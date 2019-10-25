@@ -30,7 +30,9 @@ public class FileHandler {
             InputStream in = filePart.getInputStream();
             in.read(fileContent);
             keyFileToCreate = new File(savePath, fileName + ".key");
-            
+
+            //tu prebieha sifrovanie, vratia sa zasifrovane byte-i
+            fileContent = CryptoUPB.encrypt(fileContent);
             /*
                 --------------------------------------------------------------------------------
                             DO SOMETHING WITH FILE BYTES HERE BEFORE SAVING
@@ -48,8 +50,10 @@ public class FileHandler {
             fileOutStream.flush();
             fileOutStream.close();
         }
-        catch (IOException e) {} 
-        
+        catch (IOException e) {} catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return fileToCreate;
         
     }
