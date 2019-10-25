@@ -1,6 +1,20 @@
 Projekt je urobeny ako Maven project, takze dependencies sa vyriesia automaticky.
 Najprv si synchronizujte tento git do nejakeho priecinku.
 
+Idea fungovania aplikacie:
+1. Clovek dostane pred seba formular, tam si moze zadat:
+- subor, s ktorym chce pracovat (vyberie z vlastneho PC)
+- verejny kluc pre asymetricku sifru (ktorou sa bude pred ulozenim sifrovat subor obsahujuci symetricky kluc).
+2. Subor sa nahra na server:
+- na serveri sa vygeneruje nahodny symetricky kluc, ktorym sa subor zasifruje pred ulozenim na server
+- vygenerovany symetricky kluc sa ulozi do formatu fileName.key hned vedla nahraneho zasifrovaneho suboru fileName.nieco, pricom tento .key subor sam o sebe bude sifrovany asymetrickou sifrou s klucom poskytnutym od cloveka pri uploade
+3. Po uspesnom nahrati na server sa cloveku spristupnia moznosti:
+- iba stiahnut subor v jeho zasifrovanej forme
+- stiahnut subor v jeho desifrovanej forme - podmienkou je, ze clovek zada svoj privatny kluc do asymetrickej sifry, ktorou server bude najprv vediet desifrovat subor, v ktorom sa nachadza KLUC symetrickej sifry suboru. Po tom, co server precita symetricky kluc pre subor pouzivatela, odsifruje ho ked ho posuva na download (subor cloveka vsak ostava zasifrovany na serveri)
+- stiahnut aplikaciu, ktora bude vediet desifrovat subor
+
+
+
 Ako importovat do vasho IDE:
   1. ak mate NetBeans IDE:
 
