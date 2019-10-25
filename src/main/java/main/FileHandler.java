@@ -53,7 +53,8 @@ public class FileHandler {
         return fileToCreate;
         
     }
-    
+    //**************** treba upravit tuto metodu aby sme v nej mohli zavolat decrypt s parametrami bytes[] file, a File pkey****************
+    //**************** treba vstupny subor ktory chceme desifrovat upravit do byte[] tvaru po skonceni decrypt dostaneme vysledok v bytes[] a treba ho dat to File typu
     //src: https://stackoverflow.com/questions/3428039/download-a-file-with-jsf
     public void handleDownload(File file) {
         HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();  

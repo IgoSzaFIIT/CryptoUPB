@@ -1,6 +1,9 @@
 package main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
@@ -16,8 +19,8 @@ public class FileManagerBean {
     //file to work with
     private File userFile;
     
-    //file containing the symmetrical key to decrypt userFile
-    private File keyFile;
+    //file containing the symmetrical key to decrypt userFile ------> nepotrebujeme v tretom tyzdni dole to je napisane
+    //private File keyFile;
     
     //asymmetrical public key to encrypt the symmetrical key
     private String aKey = null;
@@ -81,7 +84,7 @@ public class FileManagerBean {
     }
     
     //handle file downloads
-    public void handleDownload(){       
+    public void handleDownload() throws IOException {
         FileHandler h = new FileHandler();
         /*
             Decide if we want to download the file as encrypted or decrypted.
@@ -105,26 +108,20 @@ public class FileManagerBean {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please upload a file first."));
                     return;
                 }
-                if(keyFile == null) {
-                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Server error: key file for file " + userFile.getName() + " not found!"));
-                    return;
-                }
+
                 if(pKey.length() < 1) {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please specify a private key for decryption."));
                     return;
                 }
-                /*  
-                    -------------------------------------------------------------------------------------------
-                        TODO HERE:
-                        Download 'userFile' as Decrypted, decrypt file before passing for download!
-                        The 'userFile' is encrypted with symmetrical key stored in 'keyFile' (also encrypted).
-                        First, decrypt 'keyFile' using user private key 'pKey'.
-                        Second, decrypt 'userFile' using symmetrical key obtained from 'keyFile'
-                        Third, set variable toDownload as the decrypted 'userFile'
-                    -------------------------------------------------------------------------------------------
-                */
-                
-                
+
+                File fileToCreate = null;
+                //kluc musi byt v type File
+                //byte[] plainText = CryptoUPB.decrypt(userFile, pKey);
+                FileOutputStream outputStream = new FileOutputStream(fileToCreate);
+                outputStream.write(plainText);
+                outputStream.flush();
+                outputStream.close();
+                h.handleDownload(fileToCreate);
                 break;
                 
             case "a":
@@ -144,7 +141,7 @@ public class FileManagerBean {
         }
         
         if(toDownload != null)
-            h.handleDownload(toDownload);        
+            h.handleDownload(toDownload);
     }
     
     public void attrListener(ActionEvent event){
