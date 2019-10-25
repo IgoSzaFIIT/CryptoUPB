@@ -17,25 +17,28 @@ public class FileHandler {
     private final String SAVE_FOLDER = "\\temp\\";
     
     //handle file uploads
-    public File handleUpload(Part filePart){
+    public File handleUpload(Part filePart, String aKey){
         if(filePart == null)
             return null;
         
         String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
+        String fileName = filePart.getSubmittedFileName();
         File fileToCreate = null;
+        File keyFileToCreate = null;
         try {
             byte[] fileContent = new byte[(int) filePart.getSize()];
             InputStream in = filePart.getInputStream();
             in.read(fileContent);
+            keyFileToCreate = new File(savePath, fileName + ".key");
             
             /*
-                -----------------------------------------------
-                DO SOMETHING WITH FILE BYTES HERE BEFORE SAVING
-                            (ENCRYPT fileContent)
-                -----------------------------------------------
+                --------------------------------------------------------------------------------
+                            DO SOMETHING WITH FILE BYTES HERE BEFORE SAVING
+                     (ENCRYPT byte array 'fileContent' and save the KEY to keyFileToCreate)
+                --------------------------------------------------------------------------------
             */
 
-            fileToCreate = new File(savePath, filePart.getSubmittedFileName());
+            fileToCreate = new File(savePath, fileName);
             File folder = new File(savePath);
             if (!folder.exists()) {
                 folder.mkdirs();
@@ -51,15 +54,14 @@ public class FileHandler {
         
     }
     
-    //handle file downloads
     //src: https://stackoverflow.com/questions/3428039/download-a-file-with-jsf
     public void handleDownload(File file) {
         HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();  
-
+        
         response.setHeader("Content-Disposition", "attachment;filename=" + file.getName());  
         response.setContentLength((int) file.length());  
         
-        ServletOutputStream out = null;  
+        ServletOutputStream out = null;
         try {  
             FileInputStream input = new FileInputStream(file);  
             byte[] buffer = new byte[1024];  
