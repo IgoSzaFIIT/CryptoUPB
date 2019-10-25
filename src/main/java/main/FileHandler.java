@@ -29,16 +29,12 @@ public class FileHandler {
             byte[] fileContent = new byte[(int) filePart.getSize()];
             InputStream in = filePart.getInputStream();
             in.read(fileContent);
-            keyFileToCreate = new File(savePath, fileName + ".key");
+            //keyFileToCreate = new File(savePath, fileName + ".key");
 
             //tu prebieha sifrovanie, vratia sa zasifrovane byte-i
-            fileContent = CryptoUPB.encrypt(fileContent);
-            /*
-                --------------------------------------------------------------------------------
-                            DO SOMETHING WITH FILE BYTES HERE BEFORE SAVING
-                     (ENCRYPT byte array 'fileContent' and save the KEY to keyFileToCreate)
-                --------------------------------------------------------------------------------
-            */
+            // treba spravit aby aKey bol File
+            //****fileContent = CryptoUPB.encrypt(fileContent, aKey);*******
+
 
             fileToCreate = new File(savePath, fileName);
             File folder = new File(savePath);
