@@ -6,6 +6,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -65,11 +66,15 @@ public class CryptoUPB {
                 byte[] plainTextRSA = new byte[IV.length + key.getEncoded().length];
                 System.arraycopy(key.getEncoded(), 0, plainTextRSA, 0, key.getEncoded().length);
                 System.arraycopy(IV, 0, plainTextRSA, key.getEncoded().length, IV.length);
-
+//                byte[] plainTextRSA = new byte[key.getEncoded().length];
+//                System.arraycopy(key.getEncoded(), 0, plainTextRSA, 0, key.getEncoded().length);
+//
+                System.out.println(plainTextRSA);
 
 
                 //zasifrovanie symetrickej sifry RSAckom
                 byte[] RSA_output = cipher.doFinal(plainTextRSA);
+
                 System.out.println("bytes = " + RSA_output.length);
                 System.out.println("key_bytes = " + key.getEncoded().length);
                 System.out.println("iv_bytes = " + IV.length);
@@ -84,17 +89,32 @@ public class CryptoUPB {
 
             }else{
                 //nacitanie RSAKey a rozparsovanie
-                FileInputStream key_fis = new FileInputStream(RSAKey);
-                ObjectInputStream ois = new ObjectInputStream(key_fis);
-                BigInteger modulus = (BigInteger) ois.readObject();
-                BigInteger exponent = (BigInteger) ois.readObject();
-                RSAPrivateKeySpec rsaPrivKSpec = new RSAPrivateKeySpec(modulus,exponent);
+//                FileInputStream key_fis = new FileInputStream(RSAKey);
+//                ObjectInputStream ois = new ObjectInputStream(key_fis);
+//                BigInteger modulus = (BigInteger) ois.readObject();
+//                BigInteger exponent = (BigInteger) ois.readObject();
+//                RSAPrivateKeySpec rsaPrivKSpec = new RSAPrivateKeySpec(modulus,exponent);
+
+
+
+                byte[] publicBytes = Base64.getDecoder().decode(RSAKey);//.decodeBase64(publicK);
+
+//                if(publicBytes != null){
+//                    return publicBytes;
+//                }
+
+                PKCS8EncodedKeySpec KeySpec = new PKCS8EncodedKeySpec(publicBytes);
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+               // PublicKey publicKey = keyFactory.generatePublic(KeySpec);
+                PrivateKey privateKey = keyFactory.generatePrivate(KeySpec);
                 //
 
-                //vytvorenie privateKey
-                KeyFactory kf = KeyFactory.getInstance("RSA");
-                PrivateKey privateKey = kf.generatePrivate(rsaPrivKSpec);
-                //
+//                //vytvorenie privateKey
+//                KeyFactory kf = KeyFactory.getInstance("RSA");
+//                PrivateKey privateKey = kf.generatePrivate(rsaPrivKSpec);
+//                //
+
+
 
                 //priprava na desifrovanie RSA sifry
                 Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -120,14 +140,14 @@ public class CryptoUPB {
 
                 // Initialize Cipher for DECRYPT_MODE
                 cipher.init(cipherMode, keySpec, ivSpec);
-
+                System.out.println(fileContent);
                 byte[] outputBytes = cipher.doFinal(fileContent);
 
 
                 return outputBytes;
             }
         }catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException
-                | IllegalBlockSizeException | IOException ex) {
+                | IllegalBlockSizeException ex) {
             throw new CryptoException("Error encrypting/decrypting file", ex);
         }
     }

@@ -1,9 +1,9 @@
 package main;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
@@ -84,7 +84,7 @@ public class FileManagerBean {
     }
     
     //handle file downloads
-    public void handleDownload() throws IOException {
+    public void handleDownload() throws Exception {
         FileHandler h = new FileHandler();
         /*
             Decide if we want to download the file as encrypted or decrypted.
@@ -114,14 +114,21 @@ public class FileManagerBean {
                     return;
                 }
 
-                File fileToCreate = null;
+
+
+
+
                 //kluc musi byt v type File
-                //byte[] plainText = CryptoUPB.decrypt(userFile, pKey);
-                FileOutputStream outputStream = new FileOutputStream(fileToCreate);
-                //outputStream.write(plainText);
-                outputStream.flush();
-                outputStream.close();
-                h.handleDownload(fileToCreate);
+                byte[] fileContent = Files.readAllBytes(userFile.toPath());
+                byte[] plainText = CryptoUPB.decrypt(fileContent, pKey);
+
+
+                FileOutputStream fos = new FileOutputStream("skurvisyn");
+                fos.write(plainText);
+                //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
+
+                toDownload = new File("skurvisyn");
+
                 break;
                 
             case "a":
