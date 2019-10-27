@@ -80,7 +80,7 @@ public class FileManagerBean {
             userFile = f;
         }
         else
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file " + f.getName()));
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
     }
     
     //handle file downloads
@@ -118,7 +118,7 @@ public class FileManagerBean {
                 //kluc musi byt v type File
                 //byte[] plainText = CryptoUPB.decrypt(userFile, pKey);
                 FileOutputStream outputStream = new FileOutputStream(fileToCreate);
-                outputStream.write(plainText);
+                //outputStream.write(plainText);
                 outputStream.flush();
                 outputStream.close();
                 h.handleDownload(fileToCreate);

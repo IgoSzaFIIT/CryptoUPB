@@ -8,20 +8,23 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
+
 
 public class CryptoUPB {
 
-    public static byte[] encrypt(byte[]inputFile, File publicKey) throws Exception {
+    public static byte[] encrypt(byte[]inputFile, String publicKey) throws Exception {
         System.out.println("IN ENCR");
         return doCrypto(Cipher.ENCRYPT_MODE, inputFile, publicKey);
     }
 
-    public static byte[] decrypt(byte[] inputFile, File privateKey) throws Exception {
+    public static byte[] decrypt(byte[] inputFile, String privateKey) throws Exception {
        return doCrypto(Cipher.DECRYPT_MODE, inputFile, privateKey);
     }
 
-    private static byte[] doCrypto(int cipherMode, byte[] fileContent, File RSAKey) throws CryptoException, Exception {
+    private static byte[] doCrypto(int cipherMode, byte[] fileContent, String RSAKey) throws CryptoException, Exception {
         try {
             if (cipherMode == 1) { // encrypt
 
@@ -46,21 +49,32 @@ public class CryptoUPB {
                 // dostaneme zasifrovane byte, ktore posielame do FileHandler, kde sa z nich spravi File
                 byte[] outputBytes = cipher.doFinal(fileContent);
 
+                if(outputBytes != null) return outputBytes;
                 //kopia RSAKey
-                FileInputStream key_fis = new FileInputStream(RSAKey);
-
+//                FileInputStream key_fis = new FileInputStream(RSAKey);
+//
+//
+//
                 //deserializuje primitivne data
+                InputStream key_fis = new ByteArrayInputStream(RSAKey.getBytes());
                 ObjectInputStream ois = new ObjectInputStream(key_fis);
+
                 BigInteger modulus = (BigInteger) ois.readObject();
                 BigInteger exponent = (BigInteger) ois.readObject();
-
+//
                 //vytvorenie RSA public kluca
                 RSAPublicKeySpec rsaPKSpec = new RSAPublicKeySpec(modulus,exponent);
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 PublicKey publicKey = kf.generatePublic(rsaPKSpec);
                 //
 
-                //priprava sifrovania symetrickeho kluca RSA algoritmom
+
+//                byte[] publicBytes = Base64.getDecoder().decode(RSAKey);//.decodeBase64(publicK);
+//                X509EncodedKeySpec KeySpec = new X509EncodedKeySpec(publicBytes);
+//                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+//                PublicKey pubKey = keyFactory.generatePublic(KeySpec);
+//
+//                //priprava sifrovania symetrickeho kluca RSA algoritmom
                 cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipher.init(cipherMode, publicKey);
                 //
