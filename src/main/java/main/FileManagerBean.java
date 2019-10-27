@@ -122,15 +122,20 @@ public class FileManagerBean {
                 byte[] fileContent = Files.readAllBytes(userFile.toPath());
                 byte[] plainText = CryptoUPB.decrypt(fileContent, pKey);
 
-
-                FileOutputStream fos = new FileOutputStream("skurvisyn");
-                fos.write(plainText);
-                //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
-
-                toDownload = new File("skurvisyn");
-
+//                File fileToCreate = null;
+//                String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("");
+//                System.out.println(savePath);
+//                String fileName = "kokotko.txt";
+//                fileToCreate = new File(savePath, fileName);
+//
+//                FileOutputStream outputStream = new FileOutputStream(fileToCreate);
+//                outputStream.write(plainText);
+//                outputStream.flush();
+//                outputStream.close();
+                h.handleDownload(plainText, userFile);
+//                fileToCreate.delete();
                 break;
-                
+//
             case "a":
                 if(userFile == null) {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please upload a file first."));

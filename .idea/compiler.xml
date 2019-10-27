@@ -7,14 +7,17 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ZadanieUPB" />
+        <module name="CryptoUPB-mvn" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="CryptoUPB-mvn" target="8" />
       <module name="ZadanieUPB" target="8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="CryptoUPB-mvn" options="-endorseddirs C:\Users\msuch\IdeaProjects\CryptoUPB\target/endorsed" />
       <module name="ZadanieUPB" options="-endorseddirs $PROJECT_DIR$/target/endorsed" />
     </option>
   </component>

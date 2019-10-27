@@ -1,11 +1,7 @@
 package main;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +20,7 @@ public class FileHandler {
         String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
         String fileName = filePart.getSubmittedFileName();
         File fileToCreate = null;
-        File keyFileToCreate = null;
+        File keyFileToCreate = null;    // TODO : nahratie async key
         try {
             byte[] fileContent = new byte[(int) filePart.getSize()];
             InputStream in = filePart.getInputStream();
@@ -53,9 +49,7 @@ public class FileHandler {
         return fileToCreate;
         
     }
-    //**************** treba upravit tuto metodu aby sme v nej mohli zavolat decrypt s parametrami bytes[] file, a File pkey****************
-    //**************** treba vstupny subor ktory chceme desifrovat upravit do byte[] tvaru po skonceni decrypt dostaneme vysledok v bytes[] a treba ho dat to File typu
-    //src: https://stackoverflow.com/questions/3428039/download-a-file-with-jsf
+
     public void handleDownload(File file) {
         HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();  
         
@@ -87,5 +81,37 @@ public class FileHandler {
                 err.printStackTrace();  
             }  
     }  
+    }
+
+    public void handleDownload(byte[] file, File extensionFile) {
+        HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();
+        response.setHeader("Content-Disposition", "attachment;filename=" + extensionFile.getName());
+        response.setContentLength((int) file.length);
+
+        ServletOutputStream out = null;
+        try {
+            InputStream input = new ByteArrayInputStream(file);
+            byte[] buffer = new byte[1024];
+            out = response.getOutputStream();
+            int i = 0;
+            while((i = input.read(buffer)) != -1) {
+                out.write(buffer);
+                out.flush();
+            }
+            FacesContext.getCurrentInstance().responseComplete();
+        }
+        catch(IOException err) {
+            err.printStackTrace();
+        }
+        finally {
+            try {
+                if(out != null) {
+                    out.close();
+                }
+            }
+            catch(IOException err) {
+                err.printStackTrace();
+            }
+        }
     }
 }

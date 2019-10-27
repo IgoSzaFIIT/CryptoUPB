@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/ZadanieUPB.iml" filepath="$PROJECT_DIR$/.idea/ZadanieUPB.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CryptoUPB-mvn.iml" filepath="$PROJECT_DIR$/CryptoUPB-mvn.iml" />
     </modules>
   </component>
 </project>

@@ -27,7 +27,7 @@ public class CryptoUPB {
 
     private static byte[] doCrypto(int cipherMode, byte[] fileContent, String RSAKey) throws CryptoException, Exception {
         try {
-            if (cipherMode == 1) { // encrypt
+            if (cipherMode == Cipher.ENCRYPT_MODE) { // encrypt
 
                 //Symetricky kluc vdaka asymetrickemu sifrovaniu nemusime ukladat na servery, tak ho vygenerujeme tu
                 KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -38,14 +38,15 @@ public class CryptoUPB {
                 byte[] IV = new byte[16];
                 SecureRandom random = new SecureRandom();
                 random.nextBytes(IV);
+                IvParameterSpec ivSpec = new IvParameterSpec(IV);
+
+
 
                 //symetricke sifrovanie cez AES
                 Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
                 SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
-                cipher.init(cipherMode, keySpec);
+                cipher.init(cipherMode, keySpec, ivSpec);
 
-                //neviem na co to je
-                IvParameterSpec ivSpec = new IvParameterSpec(IV);
 
                 // dostaneme zasifrovane byte, ktore posielame do FileHandler, kde sa z nich spravi File
                 byte[] outputBytes = cipher.doFinal(fileContent);
@@ -105,7 +106,6 @@ public class CryptoUPB {
 
                 PKCS8EncodedKeySpec KeySpec = new PKCS8EncodedKeySpec(publicBytes);
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-               // PublicKey publicKey = keyFactory.generatePublic(KeySpec);
                 PrivateKey privateKey = keyFactory.generatePrivate(KeySpec);
                 //
 
