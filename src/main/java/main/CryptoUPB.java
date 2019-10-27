@@ -49,31 +49,13 @@ public class CryptoUPB {
                 // dostaneme zasifrovane byte, ktore posielame do FileHandler, kde sa z nich spravi File
                 byte[] outputBytes = cipher.doFinal(fileContent);
 
-                if(outputBytes != null) return outputBytes;
-                //kopia RSAKey
-//                FileInputStream key_fis = new FileInputStream(RSAKey);
-//
-//
-//
-                //deserializuje primitivne data
-                InputStream key_fis = new ByteArrayInputStream(RSAKey.getBytes());
-                ObjectInputStream ois = new ObjectInputStream(key_fis);
-
-                BigInteger modulus = (BigInteger) ois.readObject();
-                BigInteger exponent = (BigInteger) ois.readObject();
-//
-                //vytvorenie RSA public kluca
-                RSAPublicKeySpec rsaPKSpec = new RSAPublicKeySpec(modulus,exponent);
-                KeyFactory kf = KeyFactory.getInstance("RSA");
-                PublicKey publicKey = kf.generatePublic(rsaPKSpec);
-                //
 
 
-//                byte[] publicBytes = Base64.getDecoder().decode(RSAKey);//.decodeBase64(publicK);
-//                X509EncodedKeySpec KeySpec = new X509EncodedKeySpec(publicBytes);
-//                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-//                PublicKey pubKey = keyFactory.generatePublic(KeySpec);
-//
+                byte[] publicBytes = Base64.getDecoder().decode(RSAKey);//.decodeBase64(publicK);
+                X509EncodedKeySpec KeySpec = new X509EncodedKeySpec(publicBytes);
+                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+                PublicKey publicKey = keyFactory.generatePublic(KeySpec);
+
 //                //priprava sifrovania symetrickeho kluca RSA algoritmom
                 cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipher.init(cipherMode, publicKey);
@@ -83,6 +65,8 @@ public class CryptoUPB {
                 byte[] plainTextRSA = new byte[IV.length + key.getEncoded().length];
                 System.arraycopy(key.getEncoded(), 0, plainTextRSA, 0, key.getEncoded().length);
                 System.arraycopy(IV, 0, plainTextRSA, key.getEncoded().length, IV.length);
+
+
 
                 //zasifrovanie symetrickej sifry RSAckom
                 byte[] RSA_output = cipher.doFinal(plainTextRSA);
