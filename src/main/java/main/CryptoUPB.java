@@ -17,7 +17,7 @@ import java.util.Base64;
 public class CryptoUPB {
 
     public static byte[] encrypt(byte[]inputFile, String publicKey) throws Exception {
-        System.out.println("IN ENCR");
+        System.out.println("IN ENCRYPTION");
         return doCrypto(Cipher.ENCRYPT_MODE, inputFile, publicKey);
     }
 
@@ -51,6 +51,9 @@ public class CryptoUPB {
                 // dostaneme zasifrovane byte, ktore posielame do FileHandler, kde sa z nich spravi File
                 byte[] outputBytes = cipher.doFinal(fileContent);
 
+                byte[] mac = generateMACFromMessage(key, outputBytes);
+
+                System.out.println("MAC: " + mac);
 
 
                 byte[] publicBytes = Base64.getDecoder().decode(RSAKey);//.decodeBase64(publicK);
@@ -70,6 +73,7 @@ public class CryptoUPB {
 //                byte[] plainTextRSA = new byte[key.getEncoded().length];
 //                System.arraycopy(key.getEncoded(), 0, plainTextRSA, 0, key.getEncoded().length);
 //
+
                 System.out.println(plainTextRSA);
 
 
@@ -151,4 +155,14 @@ public class CryptoUPB {
             throw new CryptoException("Error encrypting/decrypting file", ex);
         }
     }
+
+    public static byte[] generateMACFromMessage (SecretKey key, byte[] msg) throws NoSuchAlgorithmException, InvalidKeyException {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(key);
+        byte[] macResult = mac.doFinal(msg);
+        return macResult;
+    }
+
+
+
 }
