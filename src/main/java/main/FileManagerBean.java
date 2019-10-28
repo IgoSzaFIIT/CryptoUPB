@@ -141,13 +141,8 @@ public class FileManagerBean {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please upload a file first."));
                     return;
                 }
-                /*  
-                    -------------------------------------------------------------------------------------------
-                        TODO HERE:
-                        Create an application used to decrypt the 'userFile'.
-                        Set variable toDownload as the application file!
-                    -------------------------------------------------------------------------------------------
-                */
+                File app =  new File(FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + "\\temp\\" + "cryptoApp.jar");
+                toDownload = app;
                 
                 break;
         }
