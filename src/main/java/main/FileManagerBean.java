@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
@@ -136,6 +137,7 @@ public class FileManagerBean {
 //                fileToCreate.delete();
                 break;
 //
+
             case "a":
                 if(userFile == null) {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please upload a file first."));
@@ -145,10 +147,44 @@ public class FileManagerBean {
                 toDownload = app;
                 
                 break;
+
+
+            case "k":
+
+                generatorHandler();
+
+
+            break;
+
+            case "p":
+
+                toDownload = new File("privateKey");
+               // h.handleDownload(toDownload);
+
+
+                break;
+
+            case "u":
+                toDownload = new File("publicKey");
+               // h.handleDownload(toDownload);
+            break;
+
         }
         
         if(toDownload != null)
             h.handleDownload(toDownload);
+    }
+
+
+    public void generatorHandler() throws NoSuchAlgorithmException, IOException {
+        KPGenerator kp = new KPGenerator();
+
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Private Key : "+kp.getEncodedPrivKey()));
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Public Key : "+kp.getEncodedPubKey()));
+        kp.saveKeys("privateKey", "publicKey");
+
+
+
     }
     
     public void attrListener(ActionEvent event){
