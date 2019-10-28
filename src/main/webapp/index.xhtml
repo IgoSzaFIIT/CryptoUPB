@@ -23,6 +23,19 @@
             <h:commandButton value="Download application to decrypt" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
                 <f:attribute name="dlType" value="a" />
             </h:commandButton>
+
+        <h:commandButton value="Generate RSA Keypair" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+            <f:attribute name="dlType" value="k" />
+        </h:commandButton>
+        <h:commandButton value="Download Private Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+            <f:attribute name="dlType" value="p" />
+        </h:commandButton>
+        <h:commandButton value="Download Public Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+            <f:attribute name="dlType" value="u" />
+        </h:commandButton>
+
+
+
 	</h:form>
     </h:body>
 </html>
