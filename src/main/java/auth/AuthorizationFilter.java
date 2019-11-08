@@ -13,17 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author Igor
- */
-
 //src: https://www.journaldev.com/7252/jsf-authentication-login-logout-database-example
 @WebFilter(filterName = "AuthFilter", urlPatterns = { "*.xhtml" })
 public class AuthorizationFilter implements Filter {
@@ -46,13 +35,15 @@ public class AuthorizationFilter implements Filter {
 			HttpSession ses = reqt.getSession(false);
 
 			String reqURI = reqt.getRequestURI();
-			if (reqURI.indexOf("/login.xhtml") >= 0
+                        if((reqURI.indexOf("/login.xhtml") >= 0) && (ses != null && ses.getAttribute("username") != null))
+                            resp.sendRedirect(reqt.getContextPath() + "/faces/index.xhtml");
+                        else if (reqURI.indexOf("/login.xhtml") >= 0
 					|| (ses != null && ses.getAttribute("username") != null)
-					|| reqURI.indexOf("/public/") >= 0
+					|| reqURI.indexOf("/auth/") >= 0
 					|| reqURI.contains("javax.faces.resource"))
 				chain.doFilter(request, response);
 			else
-				resp.sendRedirect(reqt.getContextPath() + "/faces/login.xhtml");
+				resp.sendRedirect(reqt.getContextPath() + "/faces/auth/login.xhtml");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

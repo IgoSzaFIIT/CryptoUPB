@@ -9,10 +9,13 @@
     <h:body>
         <h3>Login portal</h3>
 	<h:form enctype="multipart/form-data">
-            Username: <h:inputText value="#{loginManagerBean.usr}"></h:inputText><br></br>
-            Password: <h:inputText value="#{loginManagerBean.pwd}"></h:inputText><br></br>
+            Username: <h:inputText value="#{authManagerBean.usr}"></h:inputText><br></br>
+            Password: <h:inputSecret value="#{authManagerBean.pwd}"></h:inputSecret><br></br>
             <br></br>
-            <h:commandButton value="Submit" action="#{loginManagerBean.handleLogin()}">
+            <h:commandButton value="Login" action="#{authManagerBean.handleLogin()}">
+            </h:commandButton>
+            <br></br>
+            <h:commandButton value="Register" action="register.xhtml?faces-redirect=true">
             </h:commandButton>
 
 	</h:form>
