@@ -33,7 +33,9 @@
         <h:commandButton value="Download Public Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
             <f:attribute name="dlType" value="u" />
         </h:commandButton>
-
+        <br></br><br></br>
+        <h:commandButton value="Logout" action="#{loginManagerBean.handleLogout()}">
+        </h:commandButton>
 
 
 	</h:form>
