@@ -6,6 +6,7 @@
 package auth;
 
 import java.io.File;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -49,6 +50,7 @@ public class DBUtils {
                 + "   id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "   username VARCHAR(100),"
                 + "   pwdhash VARCHAR(100),"
+                + "   pwdsalt BLOB,"
                 + "   loginAttempts INTEGER,"
                 + "   lastAttempt DATETIME)";
             createTableIfNotExists(conn, tableName, userTableStruct);
@@ -72,13 +74,14 @@ public class DBUtils {
         }
     }
     
-    public static void insertUser(Connection conn, String tableName, String username, String pwdhash) {
-        try {
+    public static void insertUser(Connection conn, String tableName, String username, String pwdhash, byte[] salt) {
+        try {           
             PreparedStatement stmt = conn.prepareStatement
-            ("insert into " + tableName + "(username,pwdhash,loginAttempts) values(?,?,?)");
+            ("insert into " + tableName + "(username,pwdhash,pwdsalt,loginAttempts) values(?,?,?,?)");
             stmt.setString(1,username);
             stmt.setString(2,pwdhash);
-            stmt.setInt(3, 0);
+            stmt.setBytes(3, salt);
+            stmt.setInt(4, 0);
             stmt.executeUpdate();
         }
         catch(Exception ex) {
@@ -106,6 +109,20 @@ public class DBUtils {
             ("select username,pwdhash from " + tableName + " where username = ? and pwdhash = ?");
             stmt.setString(1,username);
             stmt.setString(2,pwdhash);
+            ResultSet res = stmt.executeQuery();
+            return res;
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
+    public static ResultSet selectUserPwdSalt(Connection conn, String tableName, String username) {
+        try {
+            PreparedStatement stmt = conn.prepareStatement
+            ("select username,pwdsalt from " + tableName + " where username = ?");
+            stmt.setString(1,username);
             ResultSet res = stmt.executeQuery();
             return res;
         }

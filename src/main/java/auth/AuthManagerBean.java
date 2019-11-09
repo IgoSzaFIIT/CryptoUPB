@@ -5,12 +5,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -77,12 +79,8 @@ public class AuthManagerBean {
         if(pwd.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter your password."));
             return null;
-        }
-        /*
-            TODO:
-            potrebujeme z DB vytiahnut salt pre daneho uzivatela
-        */
-        String pwdhash = pwd;
+        }        
+        
         int nAttempts = 0;
         Timestamp lastAttempt = null;
         ResultSet res = DBUtils.selectLoginAttempts(dbConn, USERS_TABLE_NAME, usr);
@@ -109,16 +107,30 @@ public class AuthManagerBean {
         catch(Exception ex) {
             ex.printStackTrace();
         }
+        
+        /*
+            TODO:
+            potrebujeme pouzit salt vytiahnuty z DB a heslo zadane pouzivatelom na vytvorenie 'pwdhash'
+        */
+        ResultSet res2 = DBUtils.selectUserPwdSalt(dbConn, USERS_TABLE_NAME, usr);
+        byte[] salt = new byte[0];
+        try {
+            if(res2.isBeforeFirst()) {
+                salt = res2.getBytes("pwdsalt");
+            }
+        }catch(Exception ex) {ex.printStackTrace();}
+        String pwdhash = pwd;
 
         boolean valid = validateLogin(this.usr, pwdhash);
         nAttempts++;
         if(!valid) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Username/password combination is incorrect."));
+            /*  pozor, chceme eventuelne tuto apku mat multi-user, toto zamrzne celu web apku pre vsetkych userov na 2s
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
             DBUtils.updateLoginAttempts(dbConn, USERS_TABLE_NAME, usr, nAttempts);
             return null;
         }
@@ -176,8 +188,7 @@ public class AuthManagerBean {
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
         }
-        //TODO: treba ukladat aj salt ( meno, hash, salt )
-        DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash);
+        DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt);
 
         HttpSession session = SessionUtils.getSession();
         session.setAttribute("username", usr);
