@@ -107,11 +107,7 @@ public class AuthManagerBean {
         catch(Exception ex) {
             ex.printStackTrace();
         }
-        
-        /*
-            TODO:
-            potrebujeme pouzit salt vytiahnuty z DB a heslo zadane pouzivatelom na vytvorenie 'pwdhash'
-        */
+
         ResultSet res2 = DBUtils.selectUserPwdSalt(dbConn, USERS_TABLE_NAME, usr);
         byte[] salt = new byte[0];
         try {
@@ -119,7 +115,15 @@ public class AuthManagerBean {
                 salt = res2.getBytes("pwdsalt");
             }
         }catch(Exception ex) {ex.printStackTrace();}
-        String pwdhash = pwd;
+
+        String pwdhash = null;
+        try {
+            pwdhash = Hash(pwd,salt,128, 65536);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
 
         boolean valid = validateLogin(this.usr, pwdhash);
         nAttempts++;
@@ -182,7 +186,7 @@ public class AuthManagerBean {
         byte[] salt = salt(8);
         String pwdhash = null;
         try {
-            pwdhash = Hash(pwd,salt,126,65536);
+            pwdhash = Hash(pwd,salt,128,65536);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
