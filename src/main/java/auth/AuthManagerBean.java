@@ -1,6 +1,9 @@
 package auth;
 
+
+
 import java.io.File;
+import java.io.FileReader;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -12,7 +15,10 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.List;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -22,6 +28,24 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
+
+import org.passay.CharacterCharacteristicsRule;
+import org.passay.CharacterRule;
+import org.passay.DictionarySubstringRule;
+import org.passay.EnglishCharacterData;
+import org.passay.EnglishSequenceData;
+import org.passay.IllegalSequenceRule;
+import org.passay.LengthRule;
+import org.passay.PasswordData;
+import org.passay.PasswordValidator;
+import org.passay.RepeatCharacterRegexRule;
+import org.passay.Rule;
+import org.passay.RuleResult;
+import org.passay.WhitespaceRule;
+import org.passay.dictionary.ArrayWordList;
+import org.passay.dictionary.WordListDictionary;
+import org.passay.dictionary.WordLists;
+import org.passay.dictionary.sort.ArraysSort;
 
 
 @ApplicationScoped
@@ -44,6 +68,15 @@ public class AuthManagerBean {
 
     //password repeat (used in registation)
     private String pwdR;
+
+    //slovnik na slovnikovy utok
+    private WordListDictionary slovnik;
+
+    //List podmienok na spravne heslo
+    private List<Rule> rules = new ArrayList<>();
+
+    //List errorov
+    public List<String> messageFail = new ArrayList<>();
 
     public String getUsr() {
         return usr;
@@ -155,7 +188,7 @@ public class AuthManagerBean {
     }
 
     //handle user registration
-    public String handleRegistration() {
+    public String handleRegistration() throws Exception {
         if(usr.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter a username."));
             return null;
@@ -172,30 +205,38 @@ public class AuthManagerBean {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Passwords do not match!"));
             return null;
         }
-        if(pwd.length() < 6) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password too short."));
-            return null;
-        }
-        Pattern regex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
-        if(!regex.matcher(pwd).matches()){
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password must contain at least one uppercase letter, one lowercase letter and one digit."));
-            return null;
-        }
-        //TODO:
-        // overenie ci je heslo slovnikove
-        byte[] salt = salt(8);
-        String pwdhash = null;
-        try {
-            pwdhash = Hash(pwd,salt,128,65536);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-        DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt);
+        //if(pwd.length() < 6) {
+           // FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password too short."));
+           // return null;
+       // }
+       // Pattern regex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
+       // if(!regex.matcher(pwd).matches()){
+       //     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password must contain at least one uppercase letter, one lowercase letter and one digit."));
+        //    return null;
+       // }
+        if(isValid()) {
+            //TODO:
+            // overenie ci je heslo slovnikove
+            byte[] salt = salt(8);
+            String pwdhash = null;
+            try {
+                pwdhash = Hash(pwd, salt, 128, 65536);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (InvalidKeySpecException e) {
+                e.printStackTrace();
+            }
+            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt);
 
-        HttpSession session = SessionUtils.getSession();
-        session.setAttribute("username", usr);
+            HttpSession session = SessionUtils.getSession();
+            session.setAttribute("username", usr);
+            return handleLogin();
+        }else{
+            for(String msg: messageFail){
+                System.out.println("chyba: " + msg);
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(msg));
+            }
+        }
         return handleLogin();
     }
 
@@ -250,6 +291,58 @@ public class AuthManagerBean {
         dbConn = DBUtils.initDB(dbPath, dbFileName);
     }
 
+    public void createDictionary(final String nazovSuboru) throws Exception{
+        final ArrayWordList awl = WordLists.createFromReader(new FileReader[] {new FileReader(nazovSuboru)},false, new ArraysSort());
+        slovnik = new WordListDictionary(awl);
+    }
+
+    public boolean isValid() throws Exception {
+        System.out.println("Je "+ pwd + " validne ?");
+        createDictionary("C:/Users/TNT/Desktop");
+        final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
+                new CharacterRule(EnglishCharacterData.Digit,1),
+                new CharacterRule(EnglishCharacterData.Special,1),
+                new CharacterRule(EnglishCharacterData.UpperCase,1),
+                new CharacterRule(EnglishCharacterData.LowerCase,1));
+
+        final WhitespaceRule whitespaceRule = new WhitespaceRule();
+
+        final LengthRule lengthRule = new LengthRule(8,16);
+
+        final DictionarySubstringRule dictRule = new DictionarySubstringRule(slovnik);
+        dictRule.setMatchBackwards(true);
+
+        final IllegalSequenceRule illegalSequenceRule = new IllegalSequenceRule(EnglishSequenceData.USQwerty);
+
+        final IllegalSequenceRule alphaRule = new IllegalSequenceRule(EnglishSequenceData.Alphabetical);
+
+        final IllegalSequenceRule numRule = new IllegalSequenceRule(EnglishSequenceData.Numerical);
+
+        final RepeatCharacterRegexRule dupRule = new RepeatCharacterRegexRule();
+
+        rules.add(pravidla);
+        rules.add(whitespaceRule);
+        rules.add(lengthRule);
+        rules.add(dictRule);
+        rules.add(illegalSequenceRule);
+        rules.add(alphaRule);
+        rules.add(numRule);
+        rules.add(dupRule);
+
+        final PasswordValidator validator = new PasswordValidator(rules);
+        final RuleResult result = validator.validate(new PasswordData(pwd));
+        if(result.isValid()){
+            return true;
+        }else{
+            for(String msg: validator.getMessages(result)){
+                System.out.println("chyba: " + msg);
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(msg));
+            }
+            this.messageFail = validator.getMessages(result);
+            return false;
+        }
+
+    }
 
 
 }

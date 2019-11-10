@@ -15,6 +15,8 @@
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="Maven: org.glassfish:javax.faces:2.2.7" />
+          <element id="library" level="project" name="Maven: org.xerial:sqlite-jdbc:3.28.0" />
+          <element id="library" level="project" name="Maven: org.passay:passay:1.4.0" />
         </element>
       </element>
       <element id="directory" name="META-INF">
