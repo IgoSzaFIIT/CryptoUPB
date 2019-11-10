@@ -231,7 +231,6 @@ public class AuthManagerBean {
             return handleLogin();
         }else{
             for(String msg: messageFail){
-                System.out.println("chyba: " + msg);
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(msg));
             }
             return null;
@@ -334,7 +333,6 @@ public class AuthManagerBean {
         }else{
             for(String msg: validator.getMessages(result)){
                 System.out.println("chyba: " + msg);
-                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(msg));
             }
             this.messageFail = validator.getMessages(result);
             return false;
