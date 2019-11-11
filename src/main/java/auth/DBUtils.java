@@ -24,8 +24,6 @@ public class DBUtils {
     public static Connection initDB(String dbPath, String dbFileName) {
         
         String url = "jdbc:sqlite:" + dbPath + dbFileName;
-        
-        
         File folder = new File(dbPath);
         if (!folder.exists()) {
             folder.mkdirs();

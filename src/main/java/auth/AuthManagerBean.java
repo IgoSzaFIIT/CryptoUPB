@@ -155,19 +155,10 @@ public class AuthManagerBean {
             e.printStackTrace();
         }
 
-        System.out.println("from login salt: " + Base64.getEncoder().encodeToString(salt));
-        System.out.println("from login hash: " + Base64.getEncoder().encodeToString(pwdhash.getBytes()));
-
         boolean valid = validateLogin(this.usr, pwdhash);
         nAttempts++;
         if (!valid) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Username/password combination is incorrect."));
-            /*  pozor, chceme eventuelne tuto apku mat multi-user, toto zamrzne celu web apku pre vsetkych userov na 2s
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }*/
             DBUtils.updateLoginAttempts(dbConn, USERS_TABLE_NAME, usr, nAttempts);
             return null;
         } else {
@@ -224,8 +215,6 @@ public class AuthManagerBean {
             } catch (InvalidKeySpecException e) {
                 e.printStackTrace();
             }
-            System.out.println("from registration salt: " + Base64.getEncoder().encodeToString(salt));
-            System.out.println("from registration hash: " + Base64.getEncoder().encodeToString(pwdhash.getBytes()));
             DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt);
             HttpSession session = SessionUtils.getSession();
             session.setAttribute("username", usr);
@@ -294,7 +283,6 @@ public class AuthManagerBean {
     }
 
     public boolean isValid() throws Exception {
-        System.out.println("Je " + pwd + " validne ?");
         createDictionary("/home/adrianek/Downloads/10minpasswds.txt");
         final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
                 new CharacterRule(EnglishCharacterData.Digit, 1),
