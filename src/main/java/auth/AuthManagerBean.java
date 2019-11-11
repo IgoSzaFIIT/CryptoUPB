@@ -266,7 +266,7 @@ public class AuthManagerBean {
         ResultSet res = DBUtils.selectUser(dbConn, USERS_TABLE_NAME, u, p);
         try {
             //wrong login
-            if(!res.isBeforeFirst())
+            if(res==null)
                 return false;
             //correct login
             else
@@ -295,7 +295,7 @@ public class AuthManagerBean {
 
     public boolean isValid() throws Exception {
         System.out.println("Je "+ pwd + " validne ?");
-        createDictionary("C:/Users/TNT/Desktop/10minpasswds.txt");
+        createDictionary("/home/adrianek/Downloads/10minpasswds.txt");
         final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
                 new CharacterRule(EnglishCharacterData.Digit,1),
                 new CharacterRule(EnglishCharacterData.Special,1),
