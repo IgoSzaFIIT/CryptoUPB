@@ -1,7 +1,6 @@
 package auth;
 
 
-
 import java.io.File;
 import java.io.FileReader;
 import java.security.NoSuchAlgorithmException;
@@ -15,10 +14,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
@@ -49,7 +45,7 @@ import org.passay.dictionary.sort.ArraysSort;
 
 
 @ApplicationScoped
-@ManagedBean(name="authManagerBean")
+@ManagedBean(name = "authManagerBean")
 public class AuthManagerBean {
 
     private final String INDEX_PATH = "/index.xhtml";
@@ -105,11 +101,11 @@ public class AuthManagerBean {
 
     //handle user login
     public String handleLogin() {
-        if(usr.length() < 1) {
+        if (usr.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter your username."));
             return null;
         }
-        if(pwd.length() < 1) {
+        if (pwd.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter your password."));
             return null;
         }
@@ -118,13 +114,13 @@ public class AuthManagerBean {
         Timestamp lastAttempt = null;
         ResultSet res = DBUtils.selectLoginAttempts(dbConn, USERS_TABLE_NAME, usr);
         try {
-            if(res.isBeforeFirst()) {
+            if (res.isBeforeFirst()) {
                 nAttempts = res.getInt("loginAttempts");
                 lastAttempt = res.getTimestamp("lastAttempt");
 
                 /* Lockout for 5 minutes after 3 unsuccessful attempts */
-                if(nAttempts > 2){
-                    if((java.sql.Timestamp.from(java.time.Instant.now()).getTime() - lastAttempt.getTime()) > 300000)
+                if (nAttempts > 2) {
+                    if ((java.sql.Timestamp.from(java.time.Instant.now()).getTime() - lastAttempt.getTime()) > 300000)
                         DBUtils.updateLoginAttempts(dbConn, USERS_TABLE_NAME, usr, 0);
                     else {
                         nAttempts++;
@@ -136,31 +132,35 @@ public class AuthManagerBean {
 
             }
 
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         ResultSet res2 = DBUtils.selectUserPwdSalt(dbConn, USERS_TABLE_NAME, usr);
         byte[] salt = new byte[0];
         try {
-            if(res2.isBeforeFirst()) {
+            if (res2.isBeforeFirst()) {
                 salt = res2.getBytes("pwdsalt");
             }
-        }catch(Exception ex) {ex.printStackTrace();}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         String pwdhash = null;
         try {
-            pwdhash = Hash(pwd,salt,128, 65536);
+            pwdhash = Hash(pwd, salt);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
         }
 
+        System.out.println("from login salt: " + Base64.getEncoder().encodeToString(salt));
+        System.out.println("from login hash: " + Base64.getEncoder().encodeToString(pwdhash.getBytes()));
+
         boolean valid = validateLogin(this.usr, pwdhash);
         nAttempts++;
-        if(!valid) {
+        if (!valid) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Username/password combination is incorrect."));
             /*  pozor, chceme eventuelne tuto apku mat multi-user, toto zamrzne celu web apku pre vsetkych userov na 2s
             try {
@@ -170,8 +170,7 @@ public class AuthManagerBean {
             }*/
             DBUtils.updateLoginAttempts(dbConn, USERS_TABLE_NAME, usr, nAttempts);
             return null;
-        }
-        else {
+        } else {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Login successful."));
             DBUtils.updateLoginAttempts(dbConn, USERS_TABLE_NAME, usr, 0);
             HttpSession session = SessionUtils.getSession();
@@ -189,63 +188,65 @@ public class AuthManagerBean {
 
     //handle user registration
     public String handleRegistration() throws Exception {
-        if(usr.length() < 1) {
+        if (usr.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter a username."));
             return null;
         }
-        if(pwd.length() < 1) {
+        if (pwd.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter a password."));
             return null;
         }
-        if(pwdR.length() < 1) {
+        if (pwdR.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please repeat the password."));
             return null;
         }
-        if(!pwd.equals(pwdR)) {
+        if (!pwd.equals(pwdR)) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Passwords do not match!"));
             return null;
         }
         //if(pwd.length() < 6) {
-           // FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password too short."));
-           // return null;
-       // }
-       // Pattern regex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
-       // if(!regex.matcher(pwd).matches()){
-       //     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password must contain at least one uppercase letter, one lowercase letter and one digit."));
+        // FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password too short."));
+        // return null;
+        // }
+        // Pattern regex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
+        // if(!regex.matcher(pwd).matches()){
+        //     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password must contain at least one uppercase letter, one lowercase letter and one digit."));
         //    return null;
-       // }
-        if(isValid()) {
+        // }
+        if (isValid()) {
 
             byte[] salt = salt(8);
             String pwdhash = null;
             try {
-                pwdhash = Hash(pwd, salt, 128, 65536);
+                pwdhash = Hash(pwd, salt);
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             } catch (InvalidKeySpecException e) {
                 e.printStackTrace();
             }
+            System.out.println("from registration salt: " + Base64.getEncoder().encodeToString(salt));
+            System.out.println("from registration hash: " + Base64.getEncoder().encodeToString(pwdhash.getBytes()));
             DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt);
             HttpSession session = SessionUtils.getSession();
             session.setAttribute("username", usr);
             return handleLogin();
-        }else{
-            for(String msg: messageFail){
+        } else {
+            for (String msg : messageFail) {
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(msg));
             }
             return null;
         }
     }
 
-    public String Hash(String pwd, byte[] salt, int lengthBits, int iterCount) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public String Hash(String pwd, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         //hash
-        KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt, 65536,128);
+        KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt, 65536, 128);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        String pwdhash = factory.generateSecret(spec).getEncoded().toString();
+        String pwdhash = Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
         return pwdhash;
     }
 
-    private byte[] salt(int sizeInBytes){
+    private byte[] salt(int sizeInBytes) {
         SecureRandom rnd = new SecureRandom();
         byte[] salt = new byte[sizeInBytes];
         rnd.nextBytes(salt);
@@ -257,23 +258,22 @@ public class AuthManagerBean {
             Check if user is already logged in
         */
         HttpSession session = SessionUtils.getSession();
-        if(session != null && session.getAttribute("username") != null) {
+        if (session != null && session.getAttribute("username") != null) {
             String usrS = session.getAttribute("username").toString();
-            if(usrS.equals(usr))
+            if (usrS.equals(usr))
                 return true;
         }
 
         ResultSet res = DBUtils.selectUser(dbConn, USERS_TABLE_NAME, u, p);
         try {
             //wrong login
-            if(res==null)
+            if (!res.isBeforeFirst())
                 return false;
-            //correct login
+                //correct login
             else
                 return true;
 
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
@@ -288,23 +288,23 @@ public class AuthManagerBean {
         dbConn = DBUtils.initDB(dbPath, dbFileName);
     }
 
-    public void createDictionary(final String nazovSuboru) throws Exception{
-        final ArrayWordList awl = WordLists.createFromReader(new FileReader[] {new FileReader(nazovSuboru)},false, new ArraysSort());
+    public void createDictionary(final String nazovSuboru) throws Exception {
+        final ArrayWordList awl = WordLists.createFromReader(new FileReader[]{new FileReader(nazovSuboru)}, false, new ArraysSort());
         slovnik = new WordListDictionary(awl);
     }
 
     public boolean isValid() throws Exception {
-        System.out.println("Je "+ pwd + " validne ?");
+        System.out.println("Je " + pwd + " validne ?");
         createDictionary("/home/adrianek/Downloads/10minpasswds.txt");
         final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
-                new CharacterRule(EnglishCharacterData.Digit,1),
-                new CharacterRule(EnglishCharacterData.Special,1),
-                new CharacterRule(EnglishCharacterData.UpperCase,1),
-                new CharacterRule(EnglishCharacterData.LowerCase,1));
+                new CharacterRule(EnglishCharacterData.Digit, 1),
+                new CharacterRule(EnglishCharacterData.Special, 1),
+                new CharacterRule(EnglishCharacterData.UpperCase, 1),
+                new CharacterRule(EnglishCharacterData.LowerCase, 1));
 
         final WhitespaceRule whitespaceRule = new WhitespaceRule();
 
-        final LengthRule lengthRule = new LengthRule(8,16);
+        final LengthRule lengthRule = new LengthRule(8, 16);
 
         final DictionarySubstringRule dictRule = new DictionarySubstringRule(slovnik);
         dictRule.setMatchBackwards(true);
@@ -328,10 +328,10 @@ public class AuthManagerBean {
 
         final PasswordValidator validator = new PasswordValidator(rules);
         final RuleResult result = validator.validate(new PasswordData(pwd));
-        if(result.isValid()){
+        if (result.isValid()) {
             return true;
-        }else{
-            for(String msg: validator.getMessages(result)){
+        } else {
+            for (String msg : validator.getMessages(result)) {
                 System.out.println("chyba: " + msg);
             }
             this.messageFail = validator.getMessages(result);
