@@ -239,7 +239,7 @@ public class AuthManagerBean {
 
     public String Hash(String pwd, byte[] salt, int lengthBits, int iterCount) throws NoSuchAlgorithmException, InvalidKeySpecException {
         //hash
-        KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt, iterCount, lengthBits);
+        KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt, 65536,128);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         String pwdhash = factory.generateSecret(spec).getEncoded().toString();
         return pwdhash;
