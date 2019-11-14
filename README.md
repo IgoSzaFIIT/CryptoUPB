@@ -45,8 +45,8 @@ Ako importovat do vasho IDE:
 
 <br>Zadanie 5<br> 
 -Michal Moravek <br>
-registracia - private public key, kluce ako subory - vytiahnut kluce zo suboru, zasifrovat, ulozit ako byte array<br>
-            - moznost pri registracii vygenerovat kluce<br>
+registracia - private public key, kluce ako subory - vytiahnut kluce zo suboru, zasifrovat, ulozit ako byte array ( A.B. upravy db tabluky )<br>
+            - moznost pri registracii vygenerovat kluce (pri registraciu budu buttony nahrat private key, nahrat public key, vygenerovat kluce)<br>
 pri registracii vytvorit priecinok username<br><br>
 
 
@@ -59,7 +59,7 @@ v db private key uzivatela sifrovany jeho heslom (PBKDF2 s inym poctom iteracii)
 <br>MATO SUCHTER + JURO KOMINAK <br>
 zdielanie suboro : vyberem subor<br>
 		vyberem usera<br>
-		zadam heslo - vytvori sa kluc (symetricky)<br>
+		zadam heslo - vytvori sa kluc (symetricky) <br>
 		subor sa nakopiruje druhemu uzivatelovi<br>
 		desifrujeme hlavicku nasim private key<br>
 		zasifrujeme hlavicku pub key druheho uzivatela<br>
