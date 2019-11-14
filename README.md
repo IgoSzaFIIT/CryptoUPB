@@ -41,3 +41,30 @@ Ako importovat do vasho IDE:
     
 
     - (seriozne ak to niekto ma mozem asi urobit aj na to guide, lol)
+
+
+-------------------------------- Zadanie 5 ---------------------------------
+Michal Moravek ----------
+registracia - private public key, kluce ako subory - vytiahnut kluce zo suboru, zasifrovat, ulozit ako byte array
+            - moznost pri registracii vygenerovat kluce
+pri registracii vytvorit priecinok username
+Adrian Blazicek -----------
+nova tabulka files - nazov, path, majitel
+tabulka comments - user, message, file, timestamp
+v db private key uzivatela sifrovany jeho heslom (PBKDF2 s inym poctom iteracii) - symetricka sifra
+
+MATO SUCHTER + JURO KOMINAK ------------
+zdielanie suboro : vyberem subor
+			vyberem usera
+			zadam heslo - vytvori sa kluc (symetricky)
+			subor sa nakopiruje druhemu uzivatelovi
+			desifrujeme hlavicku nasim private key
+			zasifrujeme hlavicku pub key druheho uzivatela
+
+IGOR SZALAY: ----------
+prehliadanie suborov:
+		Igor - skusit rozbehat php - toto implementovat v tom ked tak
+		dynamicky zoznam suborov + filtrovanie 
+		template pre stranku suboru -> tabulka comments - user, message, file, timestamp
+		
+
