@@ -44,8 +44,7 @@ public class FileViewerBean {
     @PostConstruct
     public void init() {
         /* Initialize SQLite DB connection */
-        //String dbPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
-        String dbPath = "D:\\tmp\\";
+        String dbPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
         String dbFileName = "users.db";
         dbConn = DBUtils.initDB(dbPath, dbFileName);
     }

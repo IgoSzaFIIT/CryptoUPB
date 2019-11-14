@@ -5,10 +5,6 @@
  */
 package file;
 
-/**
- *
- * @author Igor
- */
 public class FileResult {
     private String fileName;
     private String owner;
