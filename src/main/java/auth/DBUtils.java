@@ -144,4 +144,18 @@ public class DBUtils {
         return null;
     }
     
+    //TODO: upravit ked bude hotova tabulka files v DB
+    public static ResultSet selectAllFiles(Connection conn, String tableName) {
+        try {
+            PreparedStatement stmt = conn.prepareStatement
+            ("select filename,owner,path from " + tableName);
+            ResultSet res = stmt.executeQuery();
+            return res;
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
 }

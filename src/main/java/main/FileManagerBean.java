@@ -5,21 +5,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.servlet.http.Part;
 
-@ApplicationScoped
+@ViewScoped
 @ManagedBean(name="fileManagerBean")
 public class FileManagerBean {
+    
+    private final String SAVE_FOLDER = "\\temp\\";
+    
     private Part part;
     
     //file to work with
     private File userFile;
-    
+        
     //file containing the symmetrical key to decrypt userFile ------> nepotrebujeme v tretom tyzdni dole to je napisane
     //private File keyFile;
     
@@ -78,7 +83,6 @@ public class FileManagerBean {
         File f = h.handleUpload(part, aKey);
         if(f != null) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("File " + f.getName() + " uploaded successfully."));
-            userFile = f;
         }
         else
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
@@ -86,6 +90,14 @@ public class FileManagerBean {
     
     //handle file downloads
     public void handleDownload() throws Exception {
+        Map<String,String> params = 
+            FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+        String userFileName = params.get("fileName");
+        
+        //TODO: toto sa bude potom priradovat pomocou file path z DB, tabulky files
+        userFile = new File(FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER, userFileName);
+        
+        System.out.println("File downloaded: " + userFile.getAbsolutePath());
         FileHandler h = new FileHandler();
         /*
             Decide if we want to download the file as encrypted or decrypted.
@@ -190,6 +202,5 @@ public class FileManagerBean {
     public void attrListener(ActionEvent event){
  
 	downloadType = (String)event.getComponent().getAttributes().get("dlType");
- 
   }
 }
