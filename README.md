@@ -43,28 +43,32 @@ Ako importovat do vasho IDE:
     - (seriozne ak to niekto ma mozem asi urobit aj na to guide, lol)
 
 
--------------------------------- Zadanie 5 ---------------------------------
-Michal Moravek ----------
-registracia - private public key, kluce ako subory - vytiahnut kluce zo suboru, zasifrovat, ulozit ako byte array
-            - moznost pri registracii vygenerovat kluce
-pri registracii vytvorit priecinok username
-Adrian Blazicek -----------
-nova tabulka files - nazov, path, majitel
-tabulka comments - user, message, file, timestamp
-v db private key uzivatela sifrovany jeho heslom (PBKDF2 s inym poctom iteracii) - symetricka sifra
+<br>Zadanie 5<br> 
+-Michal Moravek <br>
+registracia - private public key, kluce ako subory - vytiahnut kluce zo suboru, zasifrovat, ulozit ako byte array<br>
+            - moznost pri registracii vygenerovat kluce<br>
+pri registracii vytvorit priecinok username<br><br>
 
-MATO SUCHTER + JURO KOMINAK ------------
-zdielanie suboro : vyberem subor
-			vyberem usera
-			zadam heslo - vytvori sa kluc (symetricky)
-			subor sa nakopiruje druhemu uzivatelovi
-			desifrujeme hlavicku nasim private key
-			zasifrujeme hlavicku pub key druheho uzivatela
 
-IGOR SZALAY: ----------
-prehliadanie suborov:
-		Igor - skusit rozbehat php - toto implementovat v tom ked tak
-		dynamicky zoznam suborov + filtrovanie 
-		template pre stranku suboru -> tabulka comments - user, message, file, timestamp
+Adrian Blazicek <br>
+nova tabulka files - nazov, path, majitel<br>
+tabulka comments - user, message, file, timestamp<br>
+v db private key uzivatela sifrovany jeho heslom (PBKDF2 s inym poctom iteracii) - symetricka sifra<br>
+
+
+<br>MATO SUCHTER + JURO KOMINAK <br>
+zdielanie suboro : vyberem subor<br>
+		vyberem usera<br>
+		zadam heslo - vytvori sa kluc (symetricky)<br>
+		subor sa nakopiruje druhemu uzivatelovi<br>
+		desifrujeme hlavicku nasim private key<br>
+		zasifrujeme hlavicku pub key druheho uzivatela<br>
+
+
+<br><br>IGOR SZALAY: <br>
+prehliadanie suborov:<br>
+	- skusit rozbehat php - toto implementovat v tom ked tak<br>
+	dynamicky zoznam suborov + filtrovanie <br>
+	template pre stranku suboru -> tabulka comments - user, message, file, timestamp<br>
 		
 
