@@ -52,6 +52,9 @@ public class AuthManagerBean {
     private final String LOGIN_PATH = "/auth/login.xhtml";
     private final String SAVE_FOLDER = "\\temp\\";
     private final String USERS_TABLE_NAME = "users";
+    private final String FILES_TABLE_NAME = "files";
+    private final String COMMENTS_TABLE_NAME = "comments";
+    private final String ACCESS_TABLE_NAME = "access";
 
     //SQLite DB
     private Connection dbConn;
@@ -195,15 +198,6 @@ public class AuthManagerBean {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Passwords do not match!"));
             return null;
         }
-        //if(pwd.length() < 6) {
-        // FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password too short."));
-        // return null;
-        // }
-        // Pattern regex = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$");
-        // if(!regex.matcher(pwd).matches()){
-        //     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Password must contain at least one uppercase letter, one lowercase letter and one digit."));
-        //    return null;
-        // }
         if (isValid()) {
 
             byte[] salt = salt(8);
@@ -215,7 +209,8 @@ public class AuthManagerBean {
             } catch (InvalidKeySpecException e) {
                 e.printStackTrace();
             }
-            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt);
+            // TODO: vytiahnut kluce zo suborov, ulozit do DB
+            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt, "","");
             HttpSession session = SessionUtils.getSession();
             session.setAttribute("username", usr);
             return handleLogin();
