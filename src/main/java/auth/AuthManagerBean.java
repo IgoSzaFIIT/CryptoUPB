@@ -210,7 +210,7 @@ public class AuthManagerBean {
                 e.printStackTrace();
             }
             // TODO: vytiahnut kluce zo suborov, ulozit do DB
-            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwdhash, salt, "","");
+            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwd, pwdhash, salt, "","");
             HttpSession session = SessionUtils.getSession();
             session.setAttribute("username", usr);
             return handleLogin();
@@ -222,7 +222,7 @@ public class AuthManagerBean {
         }
     }
 
-    public String Hash(String pwd, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static String Hash(String pwd, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
         //hash
         KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt, 65536, 128);
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
