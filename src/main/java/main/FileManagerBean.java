@@ -1,11 +1,16 @@
 package main;
 
+import auth.DBUtils;
+import auth.SessionUtils;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
@@ -17,6 +22,8 @@ import javax.servlet.http.Part;
 @ViewScoped
 @ManagedBean(name="fileManagerBean")
 public class FileManagerBean {
+    
+    private Connection dbConn;
     
     private final String SAVE_FOLDER = "\\temp\\";
     
@@ -82,6 +89,10 @@ public class FileManagerBean {
         FileHandler h = new FileHandler();
         File f = h.handleUpload(part, aKey);
         if(f != null) {
+            String username = SessionUtils.getUserName();
+            String fName = f.getName();
+            String fPath = f.getPath();
+            DBUtils.insertFile(dbConn, "files", "users", fName, fPath, username);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("File " + f.getName() + " uploaded successfully."));
         }
         else
@@ -202,5 +213,21 @@ public class FileManagerBean {
     public void attrListener(ActionEvent event){
  
 	downloadType = (String)event.getComponent().getAttributes().get("dlType");
-  }
+    }
+    
+    @PostConstruct
+    public void init() {
+        /* Initialize SQLite DB connection */
+        String dbPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
+        String dbFileName = "users.db";
+        dbConn = DBUtils.initDB(dbPath, dbFileName);
+    }
+    
+    @PreDestroy
+    public void releaseConnection() {
+        System.out.println("Closed DB connection.");
+        try {
+        dbConn.close();
+        }catch(Exception ex){ex.printStackTrace();}
+    }
 }

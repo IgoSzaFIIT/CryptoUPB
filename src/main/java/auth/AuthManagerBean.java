@@ -1,29 +1,24 @@
 package auth;
 
 
-import java.io.File;
 import java.io.FileReader;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.sql.Blob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
+import javax.faces.bean.ViewScoped;
 
 import org.passay.CharacterCharacteristicsRule;
 import org.passay.CharacterRule;
@@ -44,7 +39,7 @@ import org.passay.dictionary.WordLists;
 import org.passay.dictionary.sort.ArraysSort;
 
 
-@ApplicationScoped
+@ViewScoped
 @ManagedBean(name = "authManagerBean")
 public class AuthManagerBean {
 
@@ -198,6 +193,18 @@ public class AuthManagerBean {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Passwords do not match!"));
             return null;
         }
+        //check if username exists
+        ResultSet res = DBUtils.selectUserName(dbConn, USERS_TABLE_NAME, usr);
+        try {
+            //wrong login
+            if (res.isBeforeFirst()) {
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Username already taken!"));
+                return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }        
+
         if (isValid()) {
 
             byte[] salt = salt(8);
@@ -322,6 +329,12 @@ public class AuthManagerBean {
         }
 
     }
-
+    @PreDestroy
+    public void releaseConnection() {
+        System.out.println("Closed DB connection.");
+        try {
+        dbConn.close();
+        }catch(Exception ex){ex.printStackTrace();}
+    }
 
 }

@@ -148,6 +148,19 @@ public class DBUtils {
         }
         return null;
     }
+    
+    public static ResultSet selectUserName(Connection conn, String tableName, String username) {
+        try {
+            PreparedStatement stmt = conn.prepareStatement
+                    ("select username from " + tableName + " where username = ?");
+            stmt.setString(1, username);
+            ResultSet res = stmt.executeQuery();
+            return res;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 
     public static ResultSet selectUserPwdSalt(Connection conn, String tableName, String username) {
         try {
@@ -201,10 +214,11 @@ public class DBUtils {
                 return;
             }
             //ak subor este v db neni, pridaj ho
-            PreparedStatement stmnt = conn.prepareStatement("INSERT INTO" + fileTable + " (filename, path, owner) VALUES (?,?,(SELECT id FROM " + userTable + " WHERE username=?))");
+            PreparedStatement stmnt = conn.prepareStatement("INSERT INTO " + fileTable + " (filename, path, owner) VALUES (?,?,(SELECT id FROM " + userTable + " WHERE username=?))");
             stmnt.setString(1, filename);
             stmnt.setString(2, path);
             stmnt.setString(3, owner);
+            stmnt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
