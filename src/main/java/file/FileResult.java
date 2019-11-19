@@ -8,6 +8,7 @@ package file;
 public class FileResult {
     private String fileName;
     private String owner;
+    private int id;
 
     public String getFileName() {
         return fileName;
@@ -24,6 +25,16 @@ public class FileResult {
     public void setOwner(String owner) {
         this.owner = owner;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    
     
     
 }

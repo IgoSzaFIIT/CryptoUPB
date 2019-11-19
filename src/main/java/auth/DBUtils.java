@@ -79,6 +79,7 @@ public class DBUtils {
 
             tableName = "comments";
             TableStruct = "("
+                    + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + "message VARCHAR(500),"
                     + "file INTEGER,"
                     + "sender  INTEGER,"
@@ -192,7 +193,7 @@ public class DBUtils {
     public static ResultSet selectAllFiles(Connection conn, String tableName) {
         try {
             PreparedStatement stmt = conn.prepareStatement
-                    ("select filename ,owner ,path from " + tableName);
+                    ("select filename,owner,path,id from " + tableName);
             ResultSet res = stmt.executeQuery();
             return res;
         } catch (Exception ex) {
@@ -200,6 +201,21 @@ public class DBUtils {
         }
         return null;
     }
+    
+    public static ResultSet selectFile(Connection conn, String tableName, int fileId) {
+        try {
+            PreparedStatement stmt = conn.prepareStatement
+                    ("select filename,owner,path from " + tableName + " where id = ?");
+            stmt.setInt(1, fileId);
+            ResultSet res = stmt.executeQuery();
+            return res;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
+    
     //pri uploade vlozi file do DB
     // TODO: pri uploade suboru treba pridavat aj do db
     public static void insertFile(Connection conn, String fileTable, String userTable, String filename, String path, String owner) {
@@ -240,7 +256,12 @@ public class DBUtils {
     //add comment to file
     public static void addComment(Connection conn, String commentTable, String fileTable, String userTable, String message, String filename, String path, String sender) {
         try {
-            PreparedStatement stmnt = conn.prepareStatement("INSERT INTO " + commentTable + " (message, file, sender) value (?,(SELECT id FROM " + fileTable + " WHERE filename=? AND path=?),(SELECT id FROM " + userTable + " WHERE username=?))");
+            PreparedStatement stmnt = conn.prepareStatement("INSERT INTO " + commentTable + " (message, file, sender) values (?,(SELECT id FROM " + fileTable + " WHERE filename=? AND path=?),(SELECT id FROM " + userTable + " WHERE username=?))");
+            stmnt.setString(1, message);
+            stmnt.setString(2, filename);
+            stmnt.setString(3, path);
+            stmnt.setString(4, sender);
+            stmnt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

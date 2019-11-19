@@ -22,6 +22,7 @@
                 <h:outputLink value="file/fileDownload.xhtml">
                     <h:outputText value="#{file.fileName}" />
                     <f:param name="fileName" value="#{file.fileName}" />
+                    <f:param name="fileId" value="#{file.id}" />
                 </h:outputLink>
                 
             </h:column>

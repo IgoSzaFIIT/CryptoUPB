@@ -22,15 +22,15 @@ public class FileViewerBean {
     
     public List<FileResult> getFileList() {
         List<FileResult> list = new ArrayList<>();
-        
-        //TODO: upravit ked bude hotova tabulka files v DB
+
         ResultSet res = DBUtils.selectAllFiles(dbConn, "files");
         try {
             if(res.isBeforeFirst()) {
                 while (res.next()) {
                     FileResult fr = new FileResult();
-                    fr.setFileName(res.getString(1));
-                    fr.setOwner(res.getString(2));
+                    fr.setFileName(res.getString("filename"));
+                    fr.setOwner(res.getString("owner"));
+                    fr.setId(res.getInt("id"));
                     list.add(fr);
                 }               
             }                
