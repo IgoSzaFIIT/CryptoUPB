@@ -7,13 +7,21 @@
         <title>UPB Zadanie 5</title>
     </h:head>
     <h:body>
+        <h:outputScript name="js/filter.js" target="body" />
         <nav>
             <ul>
                 <li><a href="#">Index</a></li>
                 <li><a href="file/fileUpload.xhtml">Upload</a></li>
            </ul> 
         </nav>
-        <h:dataTable value="#{fileViewerBean.getFileList()}" var="file" border="1">
+        <div>
+            <div>
+              <span id="filter">Filter</span>
+            </div>
+            <input type="text" class="form-control" data-table="table" data-count="" placeholder="Enter text to filter..." aria-label="Filter" aria-describedby="filter"/>
+          </div>
+
+        <h:dataTable id="table" value="#{fileViewerBean.getFileList()}" var="file" border="1">
 
             <h:column>
                 <f:facet name="header">
