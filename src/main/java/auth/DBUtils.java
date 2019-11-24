@@ -401,8 +401,9 @@ public class DBUtils {
 
     private static String SymetricCipherKey(String pwd) {
         //hash
+        String salt = pwd;
         try {
-            KeySpec spec = new PBEKeySpec(pwd.toCharArray(), new byte[0], 50643, 256);
+            KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt.getBytes(), 50643, 256);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             String key = Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
             return key;
