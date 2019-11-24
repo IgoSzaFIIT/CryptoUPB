@@ -22,22 +22,22 @@ import javax.servlet.http.Part;
 @ViewScoped
 @ManagedBean(name="fileManagerBean")
 public class FileManagerBean {
-    
+
     private Connection dbConn;
-    
+
     private final String SAVE_FOLDER = "\\temp\\";
-    
+
     private Part part;
-    
+
     //file to work with
     private File userFile;
-        
+
     //file containing the symmetrical key to decrypt userFile ------> nepotrebujeme v tretom tyzdni dole to je napisane
     //private File keyFile;
-    
+
     //asymmetrical public key to encrypt the symmetrical key
     private String aKey = null;
-    
+
     //asymmetrical private key to decrypt the symmetrical key
     private String pKey = null;
 
@@ -50,7 +50,7 @@ public class FileManagerBean {
     public void setpKey(String pKey) {
         this.pKey = pKey;
     }
-    
+
     public String getaKey() {
         return aKey;
     }
@@ -74,20 +74,20 @@ public class FileManagerBean {
     public void setFile(File file) {
         this.userFile = file;
     }
-    
+
     //handle file uploads
     public void handleUpload(){
         if(part == null) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please choose a file to upload."));
             return;
         }
-        if(aKey.length() < 1) {
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please specify an asymmetrical key."));
-            return;
-        }
-        
+       // if(aKey.length() < 1) {
+        //   FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please specify an asymmetrical key."));
+        //   return;
+        //}
+
         FileHandler h = new FileHandler();
-        File f = h.handleUpload(part, aKey);
+        File f = h.handleUpload(part, DBUtils.getUserPublicKey(dbConn,SessionUtils.getUserName()));
         if(f != null) {
             String username = SessionUtils.getUserName();
             String fName = f.getName();
@@ -114,16 +114,16 @@ public class FileManagerBean {
         else
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
     }
-    
+
     //handle file downloads
     public void handleDownload() throws Exception {
-        Map<String,String> params = 
+        Map<String,String> params =
             FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         String userFileName = params.get("fileName");
-        
+
         //TODO: toto sa bude potom priradovat pomocou file path z DB, tabulky files
         userFile = new File(FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER, userFileName);
-        
+
         System.out.println("File downloaded: " + userFile.getAbsolutePath());
         FileHandler h = new FileHandler();
         /*
@@ -131,7 +131,7 @@ public class FileManagerBean {
             toDownload contains the final file to be downloaded
         */
         File toDownload = null;
-        switch(downloadType){           
+        switch(downloadType){
             case "e":
                 /*  
                     Download 'file' as Encrypted, simply pass the file saved on server for download
@@ -142,7 +142,7 @@ public class FileManagerBean {
                     return;
                 }
                 break;
-            
+
             case "d":
                 if(userFile == null) {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please upload a file first."));
@@ -184,7 +184,7 @@ public class FileManagerBean {
                 }
                 File app =  new File(FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + "\\temp\\" + "cryptoApp.jar");
                 toDownload = app;
-                
+
                 break;
 
 
@@ -209,7 +209,7 @@ public class FileManagerBean {
             break;
 
         }
-        
+
         if(toDownload != null)
             h.handleDownload(toDownload);
     }
@@ -225,13 +225,13 @@ public class FileManagerBean {
 
 
     }
-    
-    
+
+
     public void attrListener(ActionEvent event){
- 
+
 	downloadType = (String)event.getComponent().getAttributes().get("dlType");
     }
-    
+
     @PostConstruct
     public void init() {
         /* Initialize SQLite DB connection */
@@ -239,7 +239,7 @@ public class FileManagerBean {
         String dbFileName = "users.db";
         dbConn = DBUtils.initDB(dbPath, dbFileName);
     }
-    
+
     @PreDestroy
     public void releaseConnection() {
         System.out.println("Closed DB connection.");
