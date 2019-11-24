@@ -56,7 +56,7 @@ public class FileHandler {
         if(filePart == null)
             return null;
 
-        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
+        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER + SessionUtils.getUserName() + "\\";
         File fileToCreate = null;
         try {
             filePart = CryptoUPB.encrypt(filePart, pubKey);
