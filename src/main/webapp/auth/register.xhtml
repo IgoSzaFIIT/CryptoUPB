@@ -12,7 +12,10 @@
             Username: <h:inputText value="#{authManagerBean.usr}"></h:inputText><br></br>
             Password: <h:inputSecret value="#{authManagerBean.pwd}"></h:inputSecret><br></br>
             Repeat password: <h:inputSecret value="#{authManagerBean.pwdR}"></h:inputSecret><br></br>
-            <br></br>
+            Add public key: <h:inputFile value="#{authManagerBean.pubKey}"></h:inputFile><br></br>
+            Add private key: <h:inputFile value="#{authManagerBean.privKey}"></h:inputFile><br></br>
+            Generate public/private key: Password: <h:inputText value="#{authManagerBean.generate}"></h:inputText><br></br>
+        <br></br>
             <h:commandButton value="Submit" action="#{authManagerBean.handleRegistration()}">
             </h:commandButton>
 

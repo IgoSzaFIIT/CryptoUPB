@@ -1,7 +1,11 @@
 package auth;
 
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -20,6 +24,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
 import javax.faces.bean.ViewScoped;
 
+import main.KPGenerator;
 import org.passay.CharacterCharacteristicsRule;
 import org.passay.CharacterRule;
 import org.passay.DictionarySubstringRule;
@@ -72,6 +77,42 @@ public class AuthManagerBean {
     //List errorov
     public List<String> messageFail = new ArrayList<>();
 
+    private String pubKey;
+
+    private String privKey;
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    private String publicKey;
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    private String privateKey;
+
+    private String generate;
+
+    private KPGenerator kpgen;
+
+    public String getGenerate() {
+        return generate;
+    }
+
+    public void setGenerate(String generate) {
+        this.generate = generate;
+    }
+
     public String getUsr() {
         return usr;
     }
@@ -96,6 +137,21 @@ public class AuthManagerBean {
         this.pwdR = pwdR;
     }
 
+    public String getPubKey() {
+        return pubKey;
+    }
+
+    public void setPubKey(String pubKey) {
+        this.pubKey = pubKey;
+    }
+
+    public String getPrivKey() {
+        return privKey;
+    }
+
+    public void setPrivKey(String privKey) {
+        this.privKey = privKey;
+    }
 
     //handle user login
     public String handleLogin() {
@@ -177,6 +233,7 @@ public class AuthManagerBean {
 
     //handle user registration
     public String handleRegistration() throws Exception {
+        //int hodnota = Integer.getInteger(generate);
         if (usr.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter a username."));
             return null;
@@ -193,6 +250,26 @@ public class AuthManagerBean {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Passwords do not match!"));
             return null;
         }
+        if(generate.equals("2")){
+            kpgen = new KPGenerator();
+            publicKey = kpgen.getEncodedPubKey();
+            privateKey = kpgen.getEncodedPrivKey();
+        }
+        else {
+            if (pubKey.length() < 1) {
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please add public Key"));
+                return null;
+            }
+
+            if (privKey.length() < 1) {
+                FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please add private Key"));
+                return null;
+            }
+            RSAParser parser = new RSAParser();
+            publicKey = parser.getPublicKey(pubKey);
+            privateKey = parser.getPrivateKey(privKey);
+        }
+
         //check if username exists
         ResultSet res = DBUtils.selectUserName(dbConn, USERS_TABLE_NAME, usr);
         try {
@@ -207,6 +284,9 @@ public class AuthManagerBean {
 
         if (isValid()) {
 
+            //vytvorenie directory pre usera
+            userDirectory();
+
             byte[] salt = salt(8);
             String pwdhash = null;
             try {
@@ -217,7 +297,8 @@ public class AuthManagerBean {
                 e.printStackTrace();
             }
             // TODO: vytiahnut kluce zo suborov, ulozit do DB
-            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwd, pwdhash, salt, "","");
+
+            DBUtils.insertUser(dbConn, USERS_TABLE_NAME, usr, pwd, pwdhash, salt, privateKey, publicKey);
             HttpSession session = SessionUtils.getSession();
             session.setAttribute("username", usr);
             return handleLogin();
@@ -285,7 +366,7 @@ public class AuthManagerBean {
     }
 
     public boolean isValid() throws Exception {
-        createDictionary("C:\\Users\\msuch\\IdeaProjects\\upb\\upb10minpasswds.txt");
+        createDictionary("F:\\Downloads\\10minpasswds.txt");
         final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
                 new CharacterRule(EnglishCharacterData.Digit, 1),
                 new CharacterRule(EnglishCharacterData.Special, 1),
@@ -337,4 +418,61 @@ public class AuthManagerBean {
         }catch(Exception ex){ex.printStackTrace();}
     }
 
+    public void userDirectory(){
+        File file = new File("C:\\Users\\TNT\\"+usr);
+        if (!file.exists()) {
+            if (file.mkdir()) {
+                System.out.println("Directory is created!");
+            } else {
+                System.out.println("Failed to create directory!");
+            }
+        }
+    }
+
+    //Fukcia pre natlacenie File do String
+    private static String getKey(String filename) throws IOException {
+        String strKeyPEM = "";
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        String line;
+        while ((line = br.readLine()) != null) {
+            strKeyPEM += line + "\n";
+        }
+        br.close();
+        return strKeyPEM;
+    }
+
+    //Funkcia vracajuca private key
+    public static String getPrivateKey(String filename) throws IOException, GeneralSecurityException {
+        String privateKeyPEM = getKey(filename);
+        return getPrivateKeyFromString(privateKeyPEM);
+    }
+
+    //Zbavi povodny file zbytocnych prvkov, vrati iba kluc (forma zbytocnosti, resp zbytocny text sa moze menit, treba debug a skontrolovat co vsetko vyhodit)
+    public static String getPrivateKeyFromString(String key) throws IOException, GeneralSecurityException {
+        String privateKeyPEM = key;
+        privateKeyPEM = privateKeyPEM.replace("-----BEGIN RSA PRIVATE KEY-----\n", "");
+        privateKeyPEM = privateKeyPEM.replace("-----END RSA PRIVATE KEY-----", "");
+        privateKeyPEM = privateKeyPEM.replace("\n", "");
+        return privateKeyPEM;
+    }
+
+    //Funkcia vracajuca public key
+    public static String getPublicKey(String filename) throws IOException, GeneralSecurityException {
+        String publicKeyPEM = getKey(filename);
+        return getPublicKeyFromString(publicKeyPEM);
+    }
+
+    //Zbavi povodny file zbytocnych prvkov, vrati iba kluc (forma zbytocnosti, resp zbytocny text sa moze menit, treba debug a skontrolovat co vsetko vyhodit)
+    public static String getPublicKeyFromString(String key) throws IOException, GeneralSecurityException {
+        String publicKeyPEM = key;
+        publicKeyPEM = publicKeyPEM.replace("-----BEGIN PUBLIC KEY-----\n", "");
+        publicKeyPEM = publicKeyPEM.replace("-----END PUBLIC KEY-----", "");
+        publicKeyPEM = publicKeyPEM.replace("\n", "");
+        return publicKeyPEM;
+    }
+
 }
+
+
+
+
