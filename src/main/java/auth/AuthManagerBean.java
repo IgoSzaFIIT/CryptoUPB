@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
 import javax.faces.bean.ViewScoped;
+import javax.servlet.http.Part;
 
 import main.KPGenerator;
 import org.passay.CharacterCharacteristicsRule;
@@ -77,27 +78,11 @@ public class AuthManagerBean {
     //List errorov
     public List<String> messageFail = new ArrayList<>();
 
-    private String pubKey;
+    private Part pubKey;
 
-    private String privKey;
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
+    private Part privKey;
 
     private String publicKey;
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
 
     private String privateKey;
 
@@ -137,21 +122,22 @@ public class AuthManagerBean {
         this.pwdR = pwdR;
     }
 
-    public String getPubKey() {
+    public Part getPubKey() {
         return pubKey;
     }
 
-    public void setPubKey(String pubKey) {
+    public void setPubKey(Part pubKey) {
         this.pubKey = pubKey;
     }
 
-    public String getPrivKey() {
+    public Part getPrivKey() {
         return privKey;
     }
 
-    public void setPrivKey(String privKey) {
+    public void setPrivKey(Part privKey) {
         this.privKey = privKey;
     }
+
 
     //handle user login
     public String handleLogin() {
@@ -256,17 +242,16 @@ public class AuthManagerBean {
             privateKey = kpgen.getEncodedPrivKey();
         }
         else {
-            if (pubKey.length() < 1) {
+            if (pubKey == null) {
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please add public Key"));
                 return null;
             }
 
-            if (privKey.length() < 1) {
+            if (privKey == null) {
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please add private Key"));
                 return null;
             }
-            System.out.println("CESTA .....  " + pubKey);
-            System.out.println("CESTA .....  " + privKey);
+
             RSAParser parser = new RSAParser();
             publicKey = parser.getPublicKey(pubKey);
             privateKey = parser.getPrivateKey(privKey);

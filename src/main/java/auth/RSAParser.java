@@ -1,8 +1,7 @@
 package auth;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import javax.servlet.http.Part;
+import java.io.*;
 import java.security.GeneralSecurityException;
 
 public class RSAParser {
@@ -15,20 +14,17 @@ public class RSAParser {
     //  pre rozparsovanie publicKey : getPublicKey("fileName");
 
     //Fukcia pre natlacenie File do String
-    private String getKey(String path) throws IOException {
-        String strKeyPEM = "";
-        System.out.println("CESTA ....." + path);
-        BufferedReader br = new BufferedReader(new FileReader(path));
-        String line;
-        while ((line = br.readLine()) != null) {
-            strKeyPEM += line + "\n";
-        }
-        br.close();
+    private String getKey(Part path) throws IOException {
+
+        byte[] fileContent = new byte[(int) path.getSize()];
+        InputStream in = path.getInputStream();
+        in.read(fileContent);
+        String strKeyPEM = fileContent.toString();
         return strKeyPEM;
     }
 
     //Funkcia vracajuca private key
-    public String getPrivateKey(String path) throws IOException, GeneralSecurityException {
+    public String getPrivateKey(Part path) throws IOException, GeneralSecurityException {
         String privateKeyPEM = getKey(path);
         return getPrivateKeyFromString(privateKeyPEM);
     }
@@ -43,7 +39,7 @@ public class RSAParser {
     }
 
     //Funkcia vracajuca public key
-    public String getPublicKey(String path) throws IOException, GeneralSecurityException {
+    public String getPublicKey(Part path) throws IOException, GeneralSecurityException {
         String publicKeyPEM = getKey(path);
         return getPublicKeyFromString(publicKeyPEM);
     }
