@@ -88,7 +88,7 @@
         <h:form>
             Share file:<br></br>
             <h:inputTextarea value="#{shareManagerBean.usernameToShare}" pt:placeholder="Write username to share with" cols="30" rows="1"/><br></br>
-            <h:inputTextarea value="#{shareManagerBean.pwd}" pt:placeholder="Write your password" cols="30" rows="1"/><br></br>
+            <h:inputSecret value="#{shareManagerBean.pwd}" pt:placeholder="Write your password"/><br></br>
             <h:commandButton value="Share" action="#{shareManagerBean.handleShareFile()}">
                 <f:param name="fileName" value="#{param['fileName']}" />
                 <f:param name="fileId" value="#{param['fileId']}" />

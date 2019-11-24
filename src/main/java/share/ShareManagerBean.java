@@ -131,19 +131,17 @@ public class ShareManagerBean {
         if(comment.length() < 1) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter your comment first."));
             return null;
-        }
-        Map<String,String> params = 
-            FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        
-        String userFileName = params.get("fileName");
+        }        
+        String userFileName = null;
         String userFilePath = null;
         String userName = SessionUtils.getUserName();
-        String userFileIdString = params.get("fileId");
+        String userFileIdString = fileIdString;
         Integer userFileId = Integer.parseInt(userFileIdString);
         
         ResultSet res = DBUtils.selectFile(dbConn, "files", userFileId);
         try {
             if(res.isBeforeFirst()) {
+                userFileName = res.getString("filename");
                 userFilePath = res.getString("path");
             }                
         } catch (Exception ex) {
@@ -157,14 +155,12 @@ public class ShareManagerBean {
         return "fileDownload?fileName=" + userFileName + "&amp;fileId=" + userFileIdString + "&amp;faces-redirect=true";
     }
 
-    public void handleShareFile() throws Exception {
-        Map<String,String> params =
-                FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+    public String handleShareFile() throws Exception {
 
-        String userFileName = params.get("fileName");
+        String userFileName = null;
         String userFilePath = null;
         String userName = SessionUtils.getUserName();
-        String userFileIdString = params.get("fileId");
+        String userFileIdString = fileIdString;
         Integer userFileId = Integer.parseInt(userFileIdString);
         Boolean canShare = false;
 
@@ -174,6 +170,7 @@ public class ShareManagerBean {
                 ResultSet resFile = DBUtils.selectFile(dbConn, "files", userFileId);
                 try {
                     if (resFile.isBeforeFirst()) {
+                        userFileName = resFile.getString("filename");
                         userFilePath = resFile.getString("path");
                     }
                 } catch (Exception ex) {
@@ -187,14 +184,15 @@ public class ShareManagerBean {
 
                 if (canShare) {
                     // TODO : xhtml, resp nejaky prechod pre zadanie pwd
-                    DBUtils.ShareFile(dbConn,userName,usernameToShare,"pwd", userFileName, userFilePath);
+                    DBUtils.ShareFile(dbConn,userName,usernameToShare,pwd, userFileName, userFilePath);
 
                 } else
                     System.out.println("You don't have a permission for sharing this file");
             } else
-                System.out.println("User " + usernameToShare + " does not exists");
+                System.out.println("User " + usernameToShare + " does not exist");
         } else
             System.out.println("Fill username you want to share with");
+        return "fileDownload?fileName=" + userFileName + "&amp;fileId=" + userFileIdString + "&amp;faces-redirect=true";
     }
     
     public void evalAccess() {

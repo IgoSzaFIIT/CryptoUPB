@@ -328,7 +328,7 @@ public class DBUtils {
         if (valid) {
             PreparedStatement stmnt = null;
             try {
-                stmnt = conn.prepareStatement("SELECT users.privateKey FROM " + userTable + " WHERE users.usernam=?");
+                stmnt = conn.prepareStatement("SELECT users.privateKey FROM " + userTable + " WHERE users.username=?");
                 stmnt.setString(1, user);
                 rs = stmnt.executeQuery();
                 privateKey = rs.getString("privateKey");
