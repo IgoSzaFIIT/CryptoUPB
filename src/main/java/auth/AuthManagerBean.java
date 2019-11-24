@@ -277,6 +277,7 @@ public class AuthManagerBean {
         String dbPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
         String dbFileName = "users.db";
         dbConn = DBUtils.initDB(dbPath, dbFileName);
+        RSAParser parser = new RSAParser();
     }
 
     public void createDictionary(final String nazovSuboru) throws Exception {
