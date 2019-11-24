@@ -11,6 +11,10 @@ public class FileHandler {
     
     //change if you need to
     private final String SAVE_FOLDER = "\\temp\\";
+
+    public String getSaveFolder() {
+        return SAVE_FOLDER;
+    }
     
     //handle file uploads
     public File handleUpload(Part filePart, String aKey){
