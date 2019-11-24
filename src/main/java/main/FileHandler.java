@@ -1,6 +1,8 @@
 package main;
 
 
+import auth.SessionUtils;
+
 import java.io.*;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletOutputStream;
@@ -16,8 +18,8 @@ public class FileHandler {
     public File handleUpload(Part filePart, String aKey){
         if(filePart == null)
             return null;
-        
-        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
+
+        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER + SessionUtils.getUserName() + "\\";
         String fileName = filePart.getSubmittedFileName();
         File fileToCreate = null;
         File keyFileToCreate = null;    // TODO : nahratie async key
