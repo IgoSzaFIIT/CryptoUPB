@@ -265,6 +265,8 @@ public class AuthManagerBean {
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please add private Key"));
                 return null;
             }
+            System.out.println("CESTA .....  " + pubKey);
+            System.out.println("CESTA .....  " + privKey);
             RSAParser parser = new RSAParser();
             publicKey = parser.getPublicKey(pubKey);
             privateKey = parser.getPrivateKey(privKey);

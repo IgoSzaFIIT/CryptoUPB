@@ -17,6 +17,7 @@ public class RSAParser {
     //Fukcia pre natlacenie File do String
     private String getKey(String path) throws IOException {
         String strKeyPEM = "";
+        System.out.println("CESTA ....." + path);
         BufferedReader br = new BufferedReader(new FileReader(path));
         String line;
         while ((line = br.readLine()) != null) {
