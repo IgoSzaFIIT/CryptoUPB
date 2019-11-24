@@ -236,7 +236,7 @@ public class AuthManagerBean {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Passwords do not match!"));
             return null;
         }
-        if(generate.equals("2")){
+        if(generate.equals("1")){
             kpgen = new KPGenerator();
             publicKey = kpgen.getEncodedPubKey();
             privateKey = kpgen.getEncodedPrivKey();
@@ -415,49 +415,6 @@ public class AuthManagerBean {
             }
         }
     }
-
-    //Fukcia pre natlacenie File do String
-    private static String getKey(String filename) throws IOException {
-        String strKeyPEM = "";
-        BufferedReader br = new BufferedReader(new FileReader(filename));
-        String line;
-        while ((line = br.readLine()) != null) {
-            strKeyPEM += line + "\n";
-        }
-        br.close();
-        return strKeyPEM;
-    }
-
-    //Funkcia vracajuca private key
-    public static String getPrivateKey(String filename) throws IOException, GeneralSecurityException {
-        String privateKeyPEM = getKey(filename);
-        return getPrivateKeyFromString(privateKeyPEM);
-    }
-
-    //Zbavi povodny file zbytocnych prvkov, vrati iba kluc (forma zbytocnosti, resp zbytocny text sa moze menit, treba debug a skontrolovat co vsetko vyhodit)
-    public static String getPrivateKeyFromString(String key) throws IOException, GeneralSecurityException {
-        String privateKeyPEM = key;
-        privateKeyPEM = privateKeyPEM.replace("-----BEGIN RSA PRIVATE KEY-----\n", "");
-        privateKeyPEM = privateKeyPEM.replace("-----END RSA PRIVATE KEY-----", "");
-        privateKeyPEM = privateKeyPEM.replace("\n", "");
-        return privateKeyPEM;
-    }
-
-    //Funkcia vracajuca public key
-    public static String getPublicKey(String filename) throws IOException, GeneralSecurityException {
-        String publicKeyPEM = getKey(filename);
-        return getPublicKeyFromString(publicKeyPEM);
-    }
-
-    //Zbavi povodny file zbytocnych prvkov, vrati iba kluc (forma zbytocnosti, resp zbytocny text sa moze menit, treba debug a skontrolovat co vsetko vyhodit)
-    public static String getPublicKeyFromString(String key) throws IOException, GeneralSecurityException {
-        String publicKeyPEM = key;
-        publicKeyPEM = publicKeyPEM.replace("-----BEGIN PUBLIC KEY-----\n", "");
-        publicKeyPEM = publicKeyPEM.replace("-----END PUBLIC KEY-----", "");
-        publicKeyPEM = publicKeyPEM.replace("\n", "");
-        return publicKeyPEM;
-    }
-
 }
 
 
