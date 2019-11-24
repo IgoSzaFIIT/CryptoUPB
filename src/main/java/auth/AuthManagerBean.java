@@ -406,7 +406,8 @@ public class AuthManagerBean {
     }
 
     public void userDirectory(){
-        File file = new File("C:\\Users\\TNT\\"+usr);
+        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER + usr+"\\";
+        File file = new File(savePath);
         if (!file.exists()) {
             if (file.mkdir()) {
                 System.out.println("Directory is created!");
