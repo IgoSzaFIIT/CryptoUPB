@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <h:head>
         <title>UPB Zadanie 5</title>
@@ -22,28 +23,38 @@
 	<h:form enctype="multipart/form-data">
             Private Key (optional: for download as decrypted): <h:inputText value="#{fileManagerBean.pKey}"></h:inputText><br></br>
             <br></br>
-            <h:commandButton value="Download (as encrypted)" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+            <h:commandButton value="Download (as encrypted)" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
                 <f:attribute name="dlType" value="e" />
                 <f:param name="fileName" value="#{param['fileName']}" />
             </h:commandButton>
-            <h:commandButton value="Download (as decrypted)" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+            <h:commandButton value="Download (as decrypted)" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
                 <f:attribute name="dlType" value="d" />
                 <f:param name="fileName" value="#{param['fileName']}" />
             </h:commandButton>
-            <h:commandButton value="Download application to decrypt" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+            <h:commandButton value="Download application to decrypt" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
                 <f:attribute name="dlType" value="a" />
                 <f:param name="fileName" value="#{param['fileName']}" />
             </h:commandButton>
 
-        <h:commandButton value="Generate RSA Keypair" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+        <h:commandButton value="Generate RSA Keypair" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
             <f:attribute name="dlType" value="k" />
         </h:commandButton>
-        <h:commandButton value="Download Private Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+        <h:commandButton value="Download Private Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
             <f:attribute name="dlType" value="p" />
         </h:commandButton>
-        <h:commandButton value="Download Public Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+        <h:commandButton value="Download Public Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
             <f:attribute name="dlType" value="u" />
         </h:commandButton>
+        <br></br><br></br>
+            
+        <h:form>
+            Your comment:<br></br>
+            <h:inputTextarea value="#{shareManagerBean.comment}" pt:placeholder="Write your comment" cols="30" rows="10"/><br></br>
+            <h:commandButton value="Submit" action="#{shareManagerBean.handleAddComment()}">
+                <f:param name="fileName" value="#{param['fileName']}" />
+                <f:param name="fileId" value="#{param['fileId']}" />
+             </h:commandButton>
+    	</h:form>
 
         <br></br><br></br>
         <h:commandButton value="Logout" action="#{authManagerBean.handleLogout()}">
@@ -76,23 +87,15 @@
 
         <h:form>
             Share file:<br></br>
-            <h:inputTextarea value="#{shareManagerBean.usernameToShare}" placeholder="Write username to share with" cols="30" rows="1"/><br></br>
-            <h:inputTextarea value="#{shareManagerBean.pwd}" placeholder="Write your password" cols="30" rows="1"/><br></br>
+            <h:inputTextarea value="#{shareManagerBean.usernameToShare}" pt:placeholder="Write username to share with" cols="30" rows="1"/><br></br>
+            <h:inputTextarea value="#{shareManagerBean.pwd}" pt:placeholder="Write your password" cols="30" rows="1"/><br></br>
             <h:commandButton value="Share" action="#{shareManagerBean.handleShareFile()}">
                 <f:param name="fileName" value="#{param['fileName']}" />
                 <f:param name="fileId" value="#{param['fileId']}" />
             </h:commandButton>
-        </h:form>
-        <br></br><br></br>
+        </h:form>        
         
-        <h:form>
-		Your comment:<br></br>
-    		<h:inputTextarea value="#{shareManagerBean.comment}" cols="30" rows="10"/><br></br>
-    		<h:commandButton value="Submit" action="#{shareManagerBean.handleAddComment()}">
-                    <f:param name="fileName" value="#{param['fileName']}" />
-                    <f:param name="fileId" value="#{param['fileId']}" />
-                 </h:commandButton>
-    	  </h:form>
+        
     </h:body>
 </html>
 

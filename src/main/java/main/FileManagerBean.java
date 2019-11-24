@@ -93,6 +93,7 @@ public class FileManagerBean {
             String fName = f.getName();
             String fPath = f.getPath();
             DBUtils.insertFile(dbConn, "files", "users", fName, fPath, username);
+            DBUtils.grantAccess(dbConn, "access", "files", "users", fName, fPath, username);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("File " + f.getName() + " uploaded successfully."));
         }
         else
@@ -224,6 +225,7 @@ public class FileManagerBean {
 
 
     }
+    
     
     public void attrListener(ActionEvent event){
  

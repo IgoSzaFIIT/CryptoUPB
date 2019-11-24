@@ -11,12 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
-@ViewScoped
+@RequestScoped
 @ManagedBean(name="shareManagerBean")
 public class ShareManagerBean {
     
@@ -36,6 +38,16 @@ public class ShareManagerBean {
     private String usernameToShare;
 
     private String pwd;
+    
+    private boolean hasAccess;
+
+    public boolean isHasAccess() {
+        return hasAccess;
+    }
+
+    public void setHasAccess(boolean hasAccess) {
+        this.hasAccess = hasAccess;
+    }
 
     public String getUsernameToShare() {
         return usernameToShare;
@@ -94,6 +106,8 @@ public class ShareManagerBean {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+        
+        hasAccess = DBUtils.hasUserAccess(dbConn, fileName, filePath, SessionUtils.getUserName());
         
         ResultSet res2 = DBUtils.getFileComments(dbConn, filePath, fileName);
         try {
@@ -183,12 +197,24 @@ public class ShareManagerBean {
             System.out.println("Fill username you want to share with");
     }
     
+    public void evalAccess() {
+        
+    }
+    
     @PostConstruct
     public void init() {
         /* Initialize SQLite DB connection */
         String dbPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
         String dbFileName = "users.db";
         dbConn = DBUtils.initDB(dbPath, dbFileName);
+    }
+    
+    @PreDestroy
+    public void releaseConnection() {
+        System.out.println("Closed DB connection.");
+        try {
+        dbConn.close();
+        }catch(Exception ex){ex.printStackTrace();}
     }
 
 }

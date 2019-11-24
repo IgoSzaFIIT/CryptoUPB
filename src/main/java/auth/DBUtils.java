@@ -79,7 +79,7 @@ public class DBUtils {
                     + "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + "  filename VARCHAR(100),"
                     + "  path VARCHAR(100),"
-                    + "  d INTEGER )";
+                    + "  owner INTEGER )";
             createTableIfNotExists(conn, tableName, TableStruct);
 
             tableName = "access";
@@ -201,10 +201,10 @@ public class DBUtils {
     }
 
     // file table related selects
-    public static ResultSet selectAllFiles(Connection conn, String tableName) {
+    public static ResultSet selectAllFiles(Connection conn) {
         try {
             PreparedStatement stmt = conn.prepareStatement
-                    ("select filename,owner,path,id from " + tableName);
+                    ("select files.filename,users.username,files.path,files.id from files join users on files.owner = users.id");
             ResultSet res = stmt.executeQuery();
             return res;
         } catch (Exception ex) {
@@ -402,7 +402,7 @@ public class DBUtils {
     private static String SymetricCipherKey(String pwd) {
         //hash
         try {
-            KeySpec spec = new PBEKeySpec(pwd.toCharArray(), null, 50643, 256);
+            KeySpec spec = new PBEKeySpec(pwd.toCharArray(), new byte[0], 50643, 256);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             String key = Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
             return key;
@@ -438,6 +438,7 @@ public class DBUtils {
             String fName = f.getName();
             String fPath = f.getPath();
             DBUtils.insertFile(conn, "files", "users", fName, fPath, username);
+            DBUtils.grantAccess(conn, "access", "files", "users", fName, fPath, username);
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("File " + f.getName() + " uploaded successfully."));
         }
         else
