@@ -353,7 +353,7 @@ public class AuthManagerBean {
     }
 
     public boolean isValid() throws Exception {
-        createDictionary("F:\\Downloads\\10minpasswds.txt");
+        createDictionary("passwords.txt");
         final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
                 new CharacterRule(EnglishCharacterData.Digit, 1),
                 new CharacterRule(EnglishCharacterData.Special, 1),

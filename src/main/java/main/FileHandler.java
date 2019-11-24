@@ -73,9 +73,7 @@ public class FileHandler {
         catch (IOException e) {} catch (Exception e) {
             e.printStackTrace();
         }
-
         return fileToCreate;
-
     }
 
     public void handleDownload(File file) {

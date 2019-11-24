@@ -432,8 +432,7 @@ public class DBUtils {
 
     private static void handleSharedFileUpload(Connection conn, byte[] filePart, String fileName, String pubKey, String usernameToShare){
 
-        FileHandler h = new FileHandler();
-        File f = h.handleSharedFileUpload(filePart,fileName,pubKey);
+        File f = handleSharedFileUpload(filePart,fileName,pubKey, usernameToShare);
         if(f != null) {
             String username = usernameToShare;
             String fName = f.getName();
@@ -444,6 +443,34 @@ public class DBUtils {
         }
         else
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
+    }
+
+
+
+    public static File handleSharedFileUpload(byte[] filePart, String fileName, String pubKey, String usernameToShare){
+        if(filePart == null)
+            return null;
+
+        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("")+ "\\" + usernameToShare + "\\";
+        File fileToCreate = null;
+        try {
+            filePart = CryptoUPB.encrypt(filePart, pubKey);
+
+
+            fileToCreate = new File(savePath, fileName);
+            File folder = new File(savePath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            FileOutputStream fileOutStream = new FileOutputStream(fileToCreate);
+            fileOutStream.write(filePart);
+            fileOutStream.flush();
+            fileOutStream.close();
+        }
+        catch (IOException e) {} catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileToCreate;
     }
 
 }
