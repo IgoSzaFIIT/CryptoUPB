@@ -50,6 +50,34 @@ public class FileHandler {
         
     }
 
+    public File handleSharedFileUpload(byte[] filePart, String fileName, String pubKey){
+        if(filePart == null)
+            return null;
+
+        String savePath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER;
+        File fileToCreate = null;
+        try {
+            filePart = CryptoUPB.encrypt(filePart, pubKey);
+
+
+            fileToCreate = new File(savePath, fileName);
+            File folder = new File(savePath);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            FileOutputStream fileOutStream = new FileOutputStream(fileToCreate);
+            fileOutStream.write(filePart);
+            fileOutStream.flush();
+            fileOutStream.close();
+        }
+        catch (IOException e) {} catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return fileToCreate;
+
+    }
+
     public void handleDownload(File file) {
         HttpServletResponse response = (HttpServletResponse) FacesContext.getCurrentInstance().getExternalContext().getResponse();  
         

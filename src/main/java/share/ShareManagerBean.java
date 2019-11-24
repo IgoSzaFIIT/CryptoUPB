@@ -32,6 +32,27 @@ public class ShareManagerBean {
     
     private List<CommentResult> commentList;
 
+    // username provided by owner, for file sharing
+    private String usernameToShare;
+
+    private String pwd;
+
+    public String getUsernameToShare() {
+        return usernameToShare;
+    }
+
+    public void setUsernameToShare(String usernameToShare) {
+        this.usernameToShare = usernameToShare;
+    }
+
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
+    }
+
     public String getFileIdString() {
         return fileIdString;
     }
@@ -120,6 +141,46 @@ public class ShareManagerBean {
             System.out.println("An error occured while submitting user comment.");
         
         return "fileDownload?fileName=" + userFileName + "&amp;fileId=" + userFileIdString + "&amp;faces-redirect=true";
+    }
+
+    public void handleShareFile() throws Exception {
+        Map<String,String> params =
+                FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
+
+        String userFileName = params.get("fileName");
+        String userFilePath = null;
+        String userName = SessionUtils.getUserName();
+        String userFileIdString = params.get("fileId");
+        Integer userFileId = Integer.parseInt(userFileIdString);
+        Boolean canShare = false;
+
+        if(usernameToShare != null) {
+            if (DBUtils.doesUserExists(dbConn, usernameToShare)) {
+
+                ResultSet resFile = DBUtils.selectFile(dbConn, "files", userFileId);
+                try {
+                    if (resFile.isBeforeFirst()) {
+                        userFilePath = resFile.getString("path");
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                if ((userFileName != null) && (userFilePath != null) && (userName != null))
+                    canShare = DBUtils.hasUserAccess(dbConn, userFileName, userFilePath, userName);
+                else
+                    System.out.println("An error occurred while sharing a file");
+
+                if (canShare) {
+                    // TODO : xhtml, resp nejaky prechod pre zadanie pwd
+                    DBUtils.ShareFile(dbConn,userName,usernameToShare,"pwd", userFileName, userFilePath);
+
+                } else
+                    System.out.println("You don't have a permission for sharing this file");
+            } else
+                System.out.println("User " + usernameToShare + " does not exists");
+        } else
+            System.out.println("Fill username you want to share with");
     }
     
     @PostConstruct

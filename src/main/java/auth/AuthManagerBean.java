@@ -285,7 +285,7 @@ public class AuthManagerBean {
     }
 
     public boolean isValid() throws Exception {
-        createDictionary("/home/adrianek/Downloads/10minpasswds.txt");
+        createDictionary("C:\\Users\\msuch\\IdeaProjects\\upb\\upb10minpasswds.txt");
         final CharacterCharacteristicsRule pravidla = new CharacterCharacteristicsRule(3,
                 new CharacterRule(EnglishCharacterData.Digit, 1),
                 new CharacterRule(EnglishCharacterData.Special, 1),

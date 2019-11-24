@@ -98,6 +98,21 @@ public class FileManagerBean {
         else
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
     }
+
+    public void handleSharedFileUpload(byte[] filePart, String fileName, String pubKey, String usernameToShare){
+
+        FileHandler h = new FileHandler();
+        File f = h.handleSharedFileUpload(filePart,fileName,pubKey);
+        if(f != null) {
+            String username = usernameToShare;
+            String fName = f.getName();
+            String fPath = f.getPath();
+            DBUtils.insertFile(dbConn, "files", "users", fName, fPath, username);
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("File " + f.getName() + " uploaded successfully."));
+        }
+        else
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
+    }
     
     //handle file downloads
     public void handleDownload() throws Exception {

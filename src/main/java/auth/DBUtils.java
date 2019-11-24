@@ -5,13 +5,24 @@
  */
 package auth;
 
+import main.CryptoUPB;
+import main.FileHandler;
+import main.FileManagerBean;
+
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Part;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -68,7 +79,7 @@ public class DBUtils {
                     + "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + "  filename VARCHAR(100),"
                     + "  path VARCHAR(100),"
-                    + "  owner INTEGER )";
+                    + "  d INTEGER )";
             createTableIfNotExists(conn, tableName, TableStruct);
 
             tableName = "access";
@@ -357,6 +368,35 @@ public class DBUtils {
         }
         return false;
     }
+
+    public static boolean doesUserExists(Connection conn, String username){
+        try {
+            PreparedStatement stmt = conn.prepareStatement
+                    ("select username from users where username = ?");
+            stmt.setString(1, username);
+            ResultSet res = stmt.executeQuery();
+            if(res.isBeforeFirst()) return true;
+            else return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public static void ShareFile(Connection conn, String usernameOwner, String usernameToShare, String ownerPwd, String fileName, String filePath) throws Exception {
+        String fullFilePath = filePath + fileName;
+        String privateKeyOwner = getPrivateKey(conn,"users",usernameOwner, ownerPwd);
+        if(privateKeyOwner != null){
+            File userFile = new File(fullFilePath);
+            byte[] fileContent = Files.readAllBytes(userFile.toPath());
+            byte[] plainText = CryptoUPB.decrypt(fileContent, privateKeyOwner);
+
+            String publicKeyUserToShare = getUserPublicKey(conn,usernameToShare);
+            if(publicKeyUserToShare != null){
+                handleSharedFileUpload(conn, plainText, fileName, publicKeyUserToShare, usernameToShare);
+            }
+        }
+    }
     // -------- used for private key encryption --------
 
     private static String SymetricCipherKey(String pwd) {
@@ -389,5 +429,19 @@ public class DBUtils {
         return null;
     }
 
+    private static void handleSharedFileUpload(Connection conn, byte[] filePart, String fileName, String pubKey, String usernameToShare){
+
+        FileHandler h = new FileHandler();
+        File f = h.handleSharedFileUpload(filePart,fileName,pubKey);
+        if(f != null) {
+            String username = usernameToShare;
+            String fName = f.getName();
+            String fPath = f.getPath();
+            DBUtils.insertFile(conn, "files", "users", fName, fPath, username);
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("File " + f.getName() + " uploaded successfully."));
+        }
+        else
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Failed to upload file "));
+    }
 
 }

@@ -44,6 +44,7 @@
         <h:commandButton value="Download Public Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
             <f:attribute name="dlType" value="u" />
         </h:commandButton>
+
         <br></br><br></br>
         <h:commandButton value="Logout" action="#{authManagerBean.handleLogout()}">
         </h:commandButton>
@@ -71,6 +72,17 @@
               </li>
             </ui:repeat>
         </ol>
+        <br></br><br></br>
+
+        <h:form>
+            Share file:<br></br>
+            <h:inputTextarea value="#{shareManagerBean.usernameToShare}" placeholder="Write username to share with" cols="30" rows="1"/><br></br>
+            <h:inputTextarea value="#{shareManagerBean.pwd}" placeholder="Write your password" cols="30" rows="1"/><br></br>
+            <h:commandButton value="Share" action="#{shareManagerBean.handleShareFile()}">
+                <f:param name="fileName" value="#{param['fileName']}" />
+                <f:param name="fileId" value="#{param['fileId']}" />
+            </h:commandButton>
+        </h:form>
         <br></br><br></br>
         
         <h:form>
