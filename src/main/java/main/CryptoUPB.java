@@ -33,8 +33,6 @@ public class CryptoUPB {
                 KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
                 keyGenerator.init(128);
                 SecretKey key = keyGenerator.generateKey();
-                //
-                //toto neviem k comu je skuste to zistit a hodit tu koment
                 byte[] IV = new byte[16];
                 SecureRandom random = new SecureRandom();
                 random.nextBytes(IV);
@@ -50,11 +48,12 @@ public class CryptoUPB {
 
                 // dostaneme zasifrovane byte, ktore posielame do FileHandler, kde sa z nich spravi File
                 byte[] outputBytes = cipher.doFinal(fileContent);
+               
 
                 byte[] mac = generateMACFromMessage(key, outputBytes);
 
-                System.out.println("MAC: " + mac);
-                System.out.println("dlzka MAC : "  + mac.length);
+                //System.out.println("MAC: " + mac);
+                //System.out.println("dlzka MAC : "  + mac.length);
 
 
                 byte[] publicBytes = Base64.getDecoder().decode(RSAKey);//.decodeBase64(publicK);
@@ -75,15 +74,15 @@ public class CryptoUPB {
 //                System.arraycopy(key.getEncoded(), 0, plainTextRSA, 0, key.getEncoded().length);
 //
 
-                System.out.println(plainTextRSA);
+                //System.out.println(plainTextRSA);
 
 
                 //zasifrovanie symetrickej sifry RSAckom
                 byte[] RSA_output = cipher.doFinal(plainTextRSA);
 
-                System.out.println("bytes = " + RSA_output.length);
-                System.out.println("key_bytes = " + key.getEncoded().length);
-                System.out.println("iv_bytes = " + IV.length);
+                //System.out.println("bytes = " + RSA_output.length);
+                //System.out.println("key_bytes = " + key.getEncoded().length);
+                //System.out.println("iv_bytes = " + IV.length);
 
                 //vysledok kde je spojena hlavicka, kde je zasifrovany kluc a zvysok je zasifrovany text
                 byte[] AES_output = new byte[mac.length + RSA_output.length + outputBytes.length];
@@ -127,11 +126,11 @@ public class CryptoUPB {
                 cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
                 byte[] ct_RSA = Arrays.copyOfRange(fileContent, 0+32, 256+32);
-                System.out.println("cyphertext " + new String(ct_RSA) + " dd " + ct_RSA.length );
+                //System.out.println("cyphertext " + new String(ct_RSA) + " dd " + ct_RSA.length );
                 byte[] Key_IV = cipher.doFinal(ct_RSA);
 
 
-                System.out.println("jkey " + new String(Key_IV) );
+                //System.out.println("jkey " + new String(Key_IV) );
 
                 //mac pripraveny na kontrolu
                 byte[] mac = Arrays.copyOfRange(fileContent, 0, 32);
@@ -151,11 +150,28 @@ public class CryptoUPB {
 
                 // Initialize Cipher for DECRYPT_MODE
                 cipher.init(cipherMode, keySpec, ivSpec);
-                System.out.println(fileContent);
+                //System.out.println(fileContent);
+
+                /* To handle larger files */
+                ByteArrayInputStream in = new ByteArrayInputStream(fileContent);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                CipherOutputStream cos = new CipherOutputStream(outputStream, cipher);
+                byte[] buf = new byte[1024];
+                int read;
+                while((read=in.read(buf))!=-1){
+                    cos.write(buf,0,read);
+                }
+                in.close();
+                outputStream.flush();
+                cos.close();
+
+                return outputStream.toByteArray();
+                
+                /*
                 byte[] outputBytes = cipher.doFinal(fileContent);
 
 
-                return outputBytes;
+                return outputBytes;*/
             }
         }catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException
                 | IllegalBlockSizeException ex) {

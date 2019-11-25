@@ -14,6 +14,7 @@
                 <li><a href="file/fileUpload.xhtml">Upload</a></li>
            </ul> 
         </nav>
+        
         <div>
             <div>
               <span id="filter">Filter</span>
@@ -43,7 +44,17 @@
             </h:column>
 
         </h:dataTable>
+        <br></br><br></br>
         <h:form enctype="multipart/form-data">
+            <h:commandButton value="Download my public key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+                <f:attribute name="dlType" value="pubk" />
+            </h:commandButton>
+            <h:commandButton value="Download my private key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}">
+                <f:attribute name="dlType" value="prk" />
+            </h:commandButton>
+            <br></br>
+            Your password: (optional: to download your private key): <h:inputText value="#{fileManagerBean.pwd}"></h:inputText><br></br>
+            <br></br><br></br>
             <h:commandButton value="Logout" action="#{authManagerBean.handleLogout()}">
             </h:commandButton>
         </h:form>

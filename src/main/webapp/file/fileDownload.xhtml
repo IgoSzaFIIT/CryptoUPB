@@ -10,7 +10,8 @@
     </h:head>
     <h:body>
         <f:metadata>
-            <f:viewParam id="fileId" name="fileId" value="#{shareManagerBean.fileIdString}"/>
+            <f:viewParam id="fileId1" name="fileId" value="#{shareManagerBean.fileIdString}"/>
+            <f:viewParam id="fileId2" name="fileId" value="#{fileManagerBean.fileIdString}"/>
             <f:viewAction action="#{shareManagerBean.loadCommentList()}" />
         </f:metadata>
         <nav>
@@ -21,7 +22,7 @@
         </nav>
         <h3>Download file: <h:outputText value="#{param['fileName']}"/></h3>
 	<h:form enctype="multipart/form-data">
-            Private Key (optional: for download as decrypted): <h:inputText value="#{fileManagerBean.pKey}"></h:inputText><br></br>
+            <h:outputText value = "Your password: (optional: for download as decrypted): " rendered="#{shareManagerBean.hasAccess}"/><h:inputText value="#{fileManagerBean.pwd}" rendered="#{shareManagerBean.hasAccess}"></h:inputText><br></br>
             <br></br>
             <h:commandButton value="Download (as encrypted)" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
                 <f:attribute name="dlType" value="e" />
@@ -35,16 +36,6 @@
                 <f:attribute name="dlType" value="a" />
                 <f:param name="fileName" value="#{param['fileName']}" />
             </h:commandButton>
-
-        <h:commandButton value="Generate RSA Keypair" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
-            <f:attribute name="dlType" value="k" />
-        </h:commandButton>
-        <h:commandButton value="Download Private Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
-            <f:attribute name="dlType" value="p" />
-        </h:commandButton>
-        <h:commandButton value="Download Public Key" action="#{fileManagerBean.handleDownload()}" actionListener="#{fileManagerBean.attrListener}" rendered="#{shareManagerBean.hasAccess}">
-            <f:attribute name="dlType" value="u" />
-        </h:commandButton>
         <br></br><br></br>
             
         <h:form>
@@ -57,8 +48,6 @@
     	</h:form>
 
         <br></br><br></br>
-        <h:commandButton value="Logout" action="#{authManagerBean.handleLogout()}">
-        </h:commandButton>
 	</h:form>
         <br></br><br></br>
         <h4>Comment section:</h4>
@@ -93,9 +82,12 @@
                 <f:param name="fileName" value="#{param['fileName']}" />
                 <f:param name="fileId" value="#{param['fileId']}" />
             </h:commandButton>
-        </h:form>        
-        
-        
+        </h:form>     
+        <br></br><br></br>
+        <h:form>
+                <h:commandButton value="Logout" action="#{authManagerBean.handleLogout()}">
+                </h:commandButton>
+        </h:form>  
     </h:body>
 </html>
 

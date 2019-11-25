@@ -22,8 +22,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.sql.Blob;
@@ -36,6 +40,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Base64;
+import java.util.Map;
 
 /**
  * @author Igor
@@ -60,7 +65,7 @@ public class DBUtils {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                System.out.println("A new database has been created, or loaded from the file.");
             }
             String tableName = "users";
             String TableStruct = "("
@@ -115,6 +120,7 @@ public class DBUtils {
     }
 
     public static void insertUser(Connection conn, String tableName, String username, String pwd, String pwdhash, byte[] salt, String PrivateKey, String PublicKey) {
+        //fixKeyLength();
         PrivateKey = encrypt_decrypt(PrivateKey, SymetricCipherKey(pwd), 0);
         try {
             PreparedStatement stmt = conn.prepareStatement
@@ -384,7 +390,7 @@ public class DBUtils {
     }
 
     public static void ShareFile(Connection conn, String usernameOwner, String usernameToShare, String ownerPwd, String fileName, String filePath) throws Exception {
-        String fullFilePath = filePath + fileName;
+        String fullFilePath = filePath;
         String privateKeyOwner = getPrivateKey(conn,"users",usernameOwner, ownerPwd);
         if(privateKeyOwner != null){
             File userFile = new File(fullFilePath);
@@ -403,7 +409,7 @@ public class DBUtils {
         //hash
         String salt = pwd;
         try {
-            KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt.getBytes(), 50643, 256);
+            KeySpec spec = new PBEKeySpec(pwd.toCharArray(), salt.getBytes(), 50643, 128);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             String key = Base64.getEncoder().encodeToString(factory.generateSecret(spec).getEncoded());
             return key;
@@ -416,13 +422,13 @@ public class DBUtils {
     // 0 - encrypt, 1 - decrypt
     private static String encrypt_decrypt(String message, String key, int mode) {
         try {
-            Cipher cipher = Cipher.getInstance("AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             byte[] decodeKey = Base64.getDecoder().decode(key);
             SecretKey sk = new SecretKeySpec(decodeKey, 0, decodeKey.length, "AES");
             if (mode == 0) cipher.init(Cipher.ENCRYPT_MODE, sk);
             else if (mode == 1) cipher.init(Cipher.DECRYPT_MODE, sk);
             else return null;
-            final String finalString = Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes()));
+            final String finalString = (mode == 0) ? Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())) : new String(cipher.doFinal(Base64.getDecoder().decode(message)));
             return finalString;
         } catch (Exception e) {
             e.printStackTrace();
@@ -475,5 +481,7 @@ public class DBUtils {
         return fileToCreate;
 
     }
+    
+    
 
 }

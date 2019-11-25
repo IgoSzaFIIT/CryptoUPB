@@ -1,6 +1,7 @@
 package main;
 
 import auth.DBUtils;
+import auth.RSAParser;
 import auth.SessionUtils;
 import java.io.*;
 import java.nio.file.Files;
@@ -8,18 +9,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.servlet.http.Part;
 
-@ViewScoped
+@RequestScoped
 @ManagedBean(name="fileManagerBean")
 public class FileManagerBean {
 
@@ -31,33 +34,12 @@ public class FileManagerBean {
 
     //file to work with
     private File userFile;
+    
+    private String fileIdString;
 
-    //file containing the symmetrical key to decrypt userFile ------> nepotrebujeme v tretom tyzdni dole to je napisane
-    //private File keyFile;
-
-    //asymmetrical public key to encrypt the symmetrical key
-    private String aKey = null;
-
-    //asymmetrical private key to decrypt the symmetrical key
-    private String pKey = null;
+    private String pwd;
 
     private String downloadType;
-
-    public String getpKey() {
-        return pKey;
-    }
-
-    public void setpKey(String pKey) {
-        this.pKey = pKey;
-    }
-
-    public String getaKey() {
-        return aKey;
-    }
-
-    public void setaKey(String aKey) {
-        this.aKey = aKey;
-    }
 
     public Part getPart() {
         return part;
@@ -75,6 +57,24 @@ public class FileManagerBean {
         this.userFile = file;
     }
 
+    public String getPwd() {
+        return pwd;
+    }
+
+    public void setPwd(String pwd) {
+        this.pwd = pwd;
+    }
+
+    public void setFileIdString(String fileIdString) {
+        this.fileIdString = fileIdString;
+    }
+
+    public String getFileIdString() {
+        return fileIdString;
+    }
+    
+    
+
     //handle file uploads
     public void handleUpload(){
         if(part == null) {
@@ -87,7 +87,10 @@ public class FileManagerBean {
         //}
 
         FileHandler h = new FileHandler();
-        File f = h.handleUpload(part, DBUtils.getUserPublicKey(dbConn,SessionUtils.getUserName()));
+        String userName = SessionUtils.getUserName();
+        String pubKey = DBUtils.getUserPublicKey(dbConn, userName);
+        
+        File f = h.handleUpload(part, pubKey);
         if(f != null) {
             String username = SessionUtils.getUserName();
             String fName = f.getName();
@@ -117,12 +120,28 @@ public class FileManagerBean {
 
     //handle file downloads
     public void handleDownload() throws Exception {
-        Map<String,String> params =
-            FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        String userFileName = params.get("fileName");
+       
+        String fileName = "";
+        String filePath = "";
+        Integer fileId = 0;
+        try {
+            fileId = Integer.parseInt(fileIdString);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        ResultSet res1 = DBUtils.selectFile(dbConn, "files", fileId);
+        try {
+            if(res1.isBeforeFirst()) {
+                fileName = res1.getString("filename");
+                filePath = res1.getString("path");
+            }                
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
-        //TODO: toto sa bude potom priradovat pomocou file path z DB, tabulky files
-        userFile = new File(FacesContext.getCurrentInstance().getExternalContext().getRealPath("") + SAVE_FOLDER, userFileName);
+        userFile = new File(filePath);
 
         System.out.println("File downloaded: " + userFile.getAbsolutePath());
         FileHandler h = new FileHandler();
@@ -131,6 +150,7 @@ public class FileManagerBean {
             toDownload contains the final file to be downloaded
         */
         File toDownload = null;
+        String userName = SessionUtils.getUserName();
         switch(downloadType){
             case "e":
                 /*  
@@ -148,17 +168,13 @@ public class FileManagerBean {
                     FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please upload a file first."));
                     return;
                 }
-
-                if(pKey.length() < 1) {
-                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please specify a private key for decryption."));
+                
+                if(pwd.length() < 1) {
+                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter your password to use this option."));
                     return;
                 }
 
-
-
-
-
-                //kluc musi byt v type File
+                String pKey = DBUtils.getPrivateKey(dbConn, "users", userName, pwd);
                 byte[] fileContent = Files.readAllBytes(userFile.toPath());
                 byte[] plainText = CryptoUPB.decrypt(fileContent, pKey);
 
@@ -188,42 +204,31 @@ public class FileManagerBean {
                 break;
 
 
-            case "k":
-
-                generatorHandler();
-
-
-            break;
-
-            case "p":
-
-                toDownload = new File("privateKey");
-               // h.handleDownload(toDownload);
+            case "prk":
+                if(pwd.length() < 1) {
+                    FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Please enter your password to use this option."));
+                    return;
+                }
+                
+                String prKey = DBUtils.getPrivateKey(dbConn, "users", userName, pwd);
+                prKey = new RSAParser().setPrivateKey(prKey);
+                toDownload = new File("privateKey.pem");
+                h.handleDownload(prKey.getBytes(), toDownload);
 
 
                 break;
 
-            case "u":
-                toDownload = new File("publicKey");
-               // h.handleDownload(toDownload);
+            case "pubk":
+                toDownload = new File("publicKey.pem");
+                String pubKey = DBUtils.getUserPublicKey(dbConn, userName);
+                pubKey = new RSAParser().setPublicKey(pubKey);
+                h.handleDownload(pubKey.getBytes(), toDownload);
             break;
 
         }
 
         if(toDownload != null)
             h.handleDownload(toDownload);
-    }
-
-
-    public void generatorHandler() throws NoSuchAlgorithmException, IOException {
-        KPGenerator kp = new KPGenerator();
-
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Private Key : "+kp.getEncodedPrivKey()));
-        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Public Key : "+kp.getEncodedPubKey()));
-        kp.saveKeys("privateKey", "publicKey");
-
-
-
     }
 
 

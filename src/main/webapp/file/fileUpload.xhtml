@@ -15,8 +15,7 @@
         </nav>
         <h3>Upload and encrypt file</h3>
 	<h:form enctype="multipart/form-data">
-            File (optional: for upload): <h:inputFile value="#{fileManagerBean.part}"></h:inputFile><br></br>
-            Asymmetric Key (optional: for upload): <h:inputText value="#{fileManagerBean.aKey}"></h:inputText><br></br>
+            File (optional: for upload): <h:inputFile value="#{fileManagerBean.part}"></h:inputFile><br></br>            
             <br></br>
             <h:commandButton value="Upload" action="#{fileManagerBean.handleUpload()}"></h:commandButton>
             

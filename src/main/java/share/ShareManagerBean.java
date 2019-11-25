@@ -39,7 +39,7 @@ public class ShareManagerBean {
 
     private String pwd;
     
-    private boolean hasAccess;
+    private boolean hasAccess = true;
 
     public boolean isHasAccess() {
         return hasAccess;
@@ -193,10 +193,6 @@ public class ShareManagerBean {
         } else
             System.out.println("Fill username you want to share with");
         return "fileDownload?fileName=" + userFileName + "&amp;fileId=" + userFileIdString + "&amp;faces-redirect=true";
-    }
-    
-    public void evalAccess() {
-        
     }
     
     @PostConstruct
