@@ -9,8 +9,8 @@
     <h:body>
         <h3>Registration</h3>
 	<h:form enctype="multipart/form-data">
-            Username: <h:inputText value="#{authManagerBean.usr}" label = "Username"><f:validateLength minimum="1" maximum="50"/></h:inputText><br></br>
-            Password: <h:inputSecret value="#{authManagerBean.pwd}" label = "Password"><f:validateLength minimum="1" maximum="50"/></h:inputSecret><br></br>
+            Username: <h:inputText value="#{authManagerBean.usr}" label = "Username"><f:validateLength minimum="1" maximum="100"/></h:inputText><br></br>
+            Password: <h:inputSecret value="#{authManagerBean.pwd}" label = "Password"><f:validateLength minimum="1" maximum="100"/></h:inputSecret><br></br>
             Repeat password: <h:inputSecret value="#{authManagerBean.pwdR}"></h:inputSecret><br></br>
             Add public key: <h:inputFile value="#{authManagerBean.pubKey}"></h:inputFile><br></br>
             Add private key: <h:inputFile value="#{authManagerBean.privKey}"></h:inputFile><br></br>
